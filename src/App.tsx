@@ -8,11 +8,13 @@ import { Calculator } from '@/components/Calculator';
 import { BentoGrid } from '@/components/BentoGrid';
 import { FAQ } from '@/components/FAQ';
 import { Journal } from '@/components/Journal';
-import { Testimonials } from '@/components/Testimonials';
+import { ContactSection, Testimonials } from '@/components/Testimonials';
 import { ServicePage } from '@/components/ServicePage';
 import { ScheduleModal } from '@/components/ScheduleModal';
 import WhatsAppFloat from '@/components/WhatsAppFloat';
+import { LogoStrip } from '@/components/LogoStrip';
 import { parseHash, type Route } from '@/lib/router';
+import { ProspectosPage } from '@/components/ProspectosPage';
 
 function App() {
   const [route, setRoute] = useState<Route>(parseHash());
@@ -40,7 +42,9 @@ function App() {
       <Navbar onSchedule={() => openSchedule(undefined)} />
 
       <main>
-        {isServicePage ? (
+        {route.name === 'prospectos' ? (
+          <ProspectosPage />
+        ) : isServicePage ? (
           <ServicePage slug={route.slug} onSchedule={() => openSchedule(undefined)} />
         ) : (
           <>
@@ -48,10 +52,12 @@ function App() {
             <Marquee />
             <Benefits />
             <Calculator onContact={() => openSchedule(undefined)} />
+            <LogoStrip />
             <BentoGrid />
-            <Testimonials onSchedule={() => openSchedule(undefined)} />
+            <Testimonials />
             <FAQ />
             <Journal onContact={() => openSchedule(undefined)} />
+            <ContactSection onSchedule={() => openSchedule(undefined)} />
           </>
         )}
       </main>

@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: 'Beneficios', href: '#beneficios' },
   { label: 'Calculadora', href: '#calculadora' },
   { label: 'Servicios', href: '#servicios' },
+  { label: 'Ideas', href: '#ideas' },
   { label: 'Preguntas', href: '#faq' },
   { label: 'Contacto', href: '#contacto' },
 ];

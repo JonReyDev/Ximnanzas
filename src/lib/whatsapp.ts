@@ -1,4 +1,5 @@
-export const WHATSAPP_NUMBER = '5215512345678';
+export const WHATSAPP_NUMBER = '525951069096';
+export const NOTIFICATION_EMAIL = 'ximenalalith.allianzmlp@gmail.com';
 
 export function whatsappLink(message: string, number?: string): string {
   const phone = number ?? WHATSAPP_NUMBER;

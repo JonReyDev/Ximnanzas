@@ -1,4 +1,4 @@
-import { CalendarCheck, MessageCircle, Mail, Phone, MapPin } from 'lucide-react';
+import { CalendarCheck, MessageCircle, Instagram } from 'lucide-react';
 import { navigate } from '@/lib/router';
 import { whatsappLink } from '@/lib/whatsapp';
 import { SERVICES } from '@/lib/services';
@@ -50,9 +50,7 @@ export function Footer({ onSchedule }: FooterProps) {
           <div>
             <h3 className="mono" style={{ color: 'rgba(255,255,255,0.3)', marginBottom: '16px' }}>Contacto</h3>
             <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Phone size={15} style={{ color: 'var(--amber)' }} /> +52 55 1234 5678</li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Mail size={15} style={{ color: 'var(--amber)' }} /> hola@ximnanzas.mx</li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={15} style={{ color: 'var(--amber)' }} /> Polanco, CDMX</li>
+
             </ul>
             <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
               <button onClick={onSchedule} className="button" style={{ padding: '8px 16px', fontSize: '0.78rem', background: 'var(--blue)', color: 'white' }}>
@@ -60,6 +58,9 @@ export function Footer({ onSchedule }: FooterProps) {
               </button>
               <a href={whatsappLink('Hola, me gustaria mas informacion sobre sus servicios.')} target="_blank" rel="noreferrer" className="button" style={{ padding: '8px 16px', fontSize: '0.78rem', background: '#059669', color: 'white' }}>
                 <MessageCircle size={14} /> WhatsApp
+              </a>
+              <a href="https://www.instagram.com/ximnanzas/" target="_blank" rel="noreferrer" className="button" style={{ padding: '8px 16px', fontSize: '0.78rem', background: '#c13584', color: 'white' }}>
+                <Instagram size={14} /> Instagram
               </a>
             </div>
           </div>

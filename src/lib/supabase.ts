@@ -3,7 +3,30 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
+export const isSupabaseConfigured = hasSupabaseConfig;
+
+export const supabase = hasSupabaseConfig
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : ({
+      from: () => ({
+        insert: async () => ({
+          data: null,
+          error: new Error('Supabase no esta configurado.'),
+        }),
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+export async function notifySubmission(
+  type: 'lead' | 'appointment',
+  payload: Record<string, unknown>,
+): Promise<void> {
+  if (!hasSupabaseConfig) return;
+  const { error } = await supabase.functions.invoke('notify-submission', {
+    body: { type, payload },
+  });
+  if (error) console.error('No se pudo enviar la notificacion:', error);
+}
 
 export type Lead = {
   id?: string;

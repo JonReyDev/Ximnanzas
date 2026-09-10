@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, ChevronRight, ChevronLeft, Check, Calendar, Clock, User, Mail, Phone, CheckCircle2 } from 'lucide-react';
-import { supabase, type Appointment } from '@/lib/supabase';
+import { notifySubmission, supabase, type Appointment } from '@/lib/supabase';
 import { SERVICES } from '@/lib/services';
 
 type ScheduleModalProps = {
@@ -72,6 +72,7 @@ export function ScheduleModal({ open, onClose, presetService }: ScheduleModalPro
     const { error: dbError } = await supabase.from('appointments').insert([appointment]);
     setSubmitting(false);
     if (dbError) { setError('No pudimos agendar tu cita. Intenta de nuevo.'); return; }
+    await notifySubmission('appointment', appointment);
     setStep(2);
   };
 

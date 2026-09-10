@@ -1,9 +1,11 @@
 export type Route =
   | { name: 'home' }
-  | { name: 'service'; slug: string };
+  | { name: 'service'; slug: string }
+  | { name: 'prospectos' };
 
 export function parseHash(): Route {
   const hash = window.location.hash.replace(/^#\/?/, '');
+  if (window.location.pathname === '/prospectos' || hash === 'prospectos') return { name: 'prospectos' };
   if (!hash) return { name: 'home' };
   const parts = hash.split('/');
   if (parts[0] === 'servicios' && parts[1]) {
@@ -19,5 +21,6 @@ export function navigate(path: string) {
 
 export function routeToPath(route: Route): string {
   if (route.name === 'home') return '/';
+  if (route.name === 'prospectos') return '/prospectos';
   return `/servicios/${route.slug}`;
 }
