@@ -1,0 +1,71 @@
+import { useState, useEffect } from 'react';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
+import { Hero } from '@/components/Hero';
+import { Marquee } from '@/components/Marquee';
+import { Benefits } from '@/components/Benefits';
+import { Calculator } from '@/components/Calculator';
+import { BentoGrid } from '@/components/BentoGrid';
+import { FAQ } from '@/components/FAQ';
+import { Journal } from '@/components/Journal';
+import { Testimonials } from '@/components/Testimonials';
+import { ServicePage } from '@/components/ServicePage';
+import { ScheduleModal } from '@/components/ScheduleModal';
+import WhatsAppFloat from '@/components/WhatsAppFloat';
+import { parseHash, type Route } from '@/lib/router';
+
+function App() {
+  const [route, setRoute] = useState<Route>(parseHash());
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [scheduleService, setScheduleService] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      setRoute(parseHash());
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  const openSchedule = (service?: string) => {
+    setScheduleService(service);
+    setScheduleOpen(true);
+  };
+
+  const isServicePage = route.name === 'service';
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--paper)' }}>
+      <Navbar onSchedule={() => openSchedule(undefined)} />
+
+      <main>
+        {isServicePage ? (
+          <ServicePage slug={route.slug} onSchedule={() => openSchedule(undefined)} />
+        ) : (
+          <>
+            <Hero onSchedule={() => openSchedule(undefined)} />
+            <Marquee />
+            <Benefits />
+            <Calculator onContact={() => openSchedule(undefined)} />
+            <BentoGrid />
+            <Testimonials onSchedule={() => openSchedule(undefined)} />
+            <FAQ />
+            <Journal onContact={() => openSchedule(undefined)} />
+          </>
+        )}
+      </main>
+
+      <Footer onSchedule={() => openSchedule(undefined)} />
+
+      <ScheduleModal
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+        presetService={scheduleService}
+      />
+      <WhatsAppFloat />
+    </div>
+  );
+}
+
+export default App;
