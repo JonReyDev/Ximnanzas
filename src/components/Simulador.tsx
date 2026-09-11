@@ -5,7 +5,7 @@ import {
   calculateProjection,
   formatCompact,
   type RiskProfile,
-} from '@/lib/Simulador';
+} from '@/lib/simulador';
 import { generateProjectionPDF } from '@/lib/pdf';
 
 type SimuladorProps = {
