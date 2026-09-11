@@ -1,4 +1,4 @@
-import { CalendarCheck, MessageCircle, Instagram } from 'lucide-react';
+import { CalendarCheck, LockKeyhole, MessageCircle, Instagram } from 'lucide-react';
 import { navigate } from '@/lib/router';
 import { whatsappLink } from '@/lib/whatsapp';
 import { SERVICES } from '@/lib/services';
@@ -63,6 +63,9 @@ export function Footer({ onSchedule }: FooterProps) {
                 <Instagram size={14} /> Instagram
               </a>
             </div>
+            <button onClick={() => navigate('/prospectos')} className="button button-ghost" style={{ marginTop: '12px', padding: '8px 16px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)', borderColor: 'rgba(255,255,255,0.2)' }}>
+              <LockKeyhole size={14} /> Acceso a prospectos
+            </button>
           </div>
         </div>
 

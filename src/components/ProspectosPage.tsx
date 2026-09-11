@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
-import { LogOut, RefreshCw } from 'lucide-react';
+import { Download, LogOut, RefreshCw } from 'lucide-react';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+
+const LEAD_STATUSES = ['Nuevo', 'Contactado', 'En seguimiento', 'Cerrado'] as const;
+type LeadStatus = (typeof LEAD_STATUSES)[number];
 
 type Prospect = {
   id: string;
@@ -9,6 +12,7 @@ type Prospect = {
   phone: string;
   message?: string | null;
   service?: string | null;
+  status: LeadStatus;
   created_at?: string;
 };
 
@@ -18,14 +22,37 @@ type Appointment = Prospect & {
   status?: string | null;
 };
 
+function csvValue(value: unknown): string {
+  return `"${String(value ?? '').replace(/"/g, '""')}"`;
+}
+
+function downloadCsv(filename: string, headers: string[], rows: unknown[][]) {
+  const csv = [headers, ...rows].map((row) => row.map(csvValue).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+const statusColors: Record<LeadStatus, { background: string; color: string }> = {
+  Nuevo: { background: '#e0edff', color: '#174ea6' },
+  Contactado: { background: '#fff0c2', color: '#805b00' },
+  'En seguimiento': { background: '#e5ddff', color: '#5735a6' },
+  Cerrado: { background: '#d9f5e4', color: '#176b3a' },
+};
+
 export function ProspectosPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [session, setSession] = useState(false);
+  const [accessToken, setAccessToken] = useState('');
   const [leads, setLeads] = useState<Prospect[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'leads' | 'appointments'>('leads');
 
   const loadData = async () => {
     setLoading(true);
@@ -51,22 +78,48 @@ export function ProspectosPage() {
     event.preventDefault();
     setLoading(true);
     setError('');
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (authError) {
       setError('Correo o contraseña incorrectos.');
       return;
     }
     setSession(true);
+    setAccessToken(data.session?.access_token ?? '');
     setPassword('');
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
     setSession(false);
+    setAccessToken('');
     setLeads([]);
     setAppointments([]);
   };
+
+  const updateLeadStatus = async (leadId: string, nextStatus: LeadStatus) => {
+    const previousLeads = leads;
+    setLeads((current) => current.map((lead) => lead.id === leadId ? { ...lead, status: nextStatus } : lead));
+    try {
+      const response = await fetch(`/api/leads/${leadId}/status`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      if (!response.ok) throw new Error('No se pudo actualizar el estado.');
+    } catch {
+      setLeads(previousLeads);
+      setError('No se pudo guardar el estado del prospecto.');
+    }
+  };
+
+  const exportLeads = () => downloadCsv('prospectos.csv', ['Nombre', 'Correo', 'Telefono', 'Servicio', 'Estado', 'Mensaje', 'Registrada'], leads.map((lead) => [
+    lead.name, lead.email, lead.phone, lead.service || '', lead.status, lead.message || '', lead.created_at ? new Date(lead.created_at).toLocaleString('es-MX') : '',
+  ]));
+
+  const exportAppointments = () => downloadCsv('citas.csv', ['Nombre', 'Telefono', 'Fecha', 'Hora', 'Registrada'], appointments.map((appointment) => [
+    appointment.name, appointment.phone, appointment.date, appointment.time, appointment.created_at ? new Date(appointment.created_at).toLocaleString('es-MX') : '',
+  ]));
 
   if (!isSupabaseConfigured) {
     return <div className="prospectos-page"><h1>Panel de prospectos</h1><p>Configura Supabase para acceder al panel.</p></div>;
@@ -95,8 +148,15 @@ export function ProspectosPage() {
         <div className="prospectos-actions"><button className="button button-ghost" onClick={() => void loadData()}><RefreshCw size={15} /> Actualizar</button><button className="button button-primary" onClick={() => void signOut()}><LogOut size={15} /> Salir</button></div>
       </div>
       {error && <p className="prospectos-error">{error}</p>}
-      <section className="prospectos-table-section"><h2>Solicitudes de información</h2><div className="prospectos-table-wrap"><table><thead><tr><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Mensaje</th></tr></thead><tbody>{leads.map((lead) => <tr key={lead.id}><td>{lead.created_at ? new Date(lead.created_at).toLocaleString('es-MX') : '-'}</td><td>{lead.name}</td><td>{lead.email}</td><td>{lead.phone}</td><td>{lead.message || '-'}</td></tr>)}</tbody></table></div></section>
-      <section className="prospectos-table-section"><h2>Citas</h2><div className="prospectos-table-wrap"><table><thead><tr><th>Fecha de registro</th><th>Nombre</th><th>Servicio</th><th>Fecha solicitada</th><th>Hora</th><th>Estado</th></tr></thead><tbody>{appointments.map((appointment) => <tr key={appointment.id}><td>{appointment.created_at ? new Date(appointment.created_at).toLocaleString('es-MX') : '-'}</td><td>{appointment.name}</td><td>{appointment.service || '-'}</td><td>{appointment.date}</td><td>{appointment.time}</td><td>{appointment.status || 'pending'}</td></tr>)}</tbody></table></div></section>
+      <div className="prospectos-tabs" role="tablist" aria-label="Datos del panel">
+        <button className={activeTab === 'leads' ? 'active' : ''} onClick={() => setActiveTab('leads')} role="tab" aria-selected={activeTab === 'leads'}>Prospectos ({leads.length})</button>
+        <button className={activeTab === 'appointments' ? 'active' : ''} onClick={() => setActiveTab('appointments')} role="tab" aria-selected={activeTab === 'appointments'}>Citas ({appointments.length})</button>
+      </div>
+      {activeTab === 'leads' ? (
+        <section className="prospectos-table-section"><div className="prospectos-section-heading"><h2>Solicitudes de información</h2><button className="button button-ghost" onClick={exportLeads}><Download size={15} /> Exportar CSV</button></div><div className="prospectos-table-wrap"><table><thead><tr><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Estado</th><th>Mensaje</th></tr></thead><tbody>{leads.map((lead) => <tr key={lead.id}><td>{lead.created_at ? new Date(lead.created_at).toLocaleString('es-MX') : '-'}</td><td>{lead.name}</td><td>{lead.email}</td><td>{lead.phone}</td><td><select aria-label={`Estado de ${lead.name}`} value={lead.status} onChange={(event) => void updateLeadStatus(lead.id, event.target.value as LeadStatus)} style={{ ...statusColors[lead.status], border: 0, borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.78rem', fontWeight: 700, padding: '7px 10px' }}>{LEAD_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}</select></td><td>{lead.message || '-'}</td></tr>)}</tbody></table></div></section>
+      ) : (
+        <section className="prospectos-table-section"><div className="prospectos-section-heading"><h2>Citas</h2><button className="button button-ghost" onClick={exportAppointments}><Download size={15} /> Exportar CSV</button></div><div className="prospectos-table-wrap"><table><thead><tr><th>Fecha de registro</th><th>Nombre</th><th>Servicio</th><th>Fecha solicitada</th><th>Hora</th><th>Estado</th></tr></thead><tbody>{appointments.map((appointment) => <tr key={appointment.id}><td>{appointment.created_at ? new Date(appointment.created_at).toLocaleString('es-MX') : '-'}</td><td>{appointment.name}</td><td>{appointment.service || '-'}</td><td>{appointment.date}</td><td>{appointment.time}</td><td>{appointment.status || 'pending'}</td></tr>)}</tbody></table></div></section>
+      )}
     </div>
   );
 }
