@@ -2,19 +2,10 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 
 type SubmissionType = 'lead' | 'appointment';
 type Payload = Record<string, unknown>;
-
-type RequestBody = {
-  type?: SubmissionType;
-  payload?: Payload;
-};
+type RequestBody = { type?: SubmissionType; payload?: Payload };
 
 function escapeHtml(value: unknown): string {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 }
 
 function subjectFor(type: SubmissionType, payload: Payload): string {
@@ -27,7 +18,6 @@ function htmlFor(type: SubmissionType, payload: Payload): string {
     .filter(([, value]) => value !== undefined && value !== null && value !== '')
     .map(([key, value]) => `<tr><td style="padding:8px 12px;font-weight:600">${escapeHtml(key)}</td><td style="padding:8px 12px">${escapeHtml(value)}</td></tr>`)
     .join('');
-
   return `<h2>${type === 'appointment' ? 'Nueva cita solicitada' : 'Nuevo prospecto'}</h2><table style="border-collapse:collapse">${rows}</table>`;
 }
 
@@ -48,7 +38,6 @@ export default async function handler(request: IncomingMessage, response: Server
   const resendApiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL;
   const recipient = process.env.NOTIFICATION_EMAIL ?? 'ximenalalith.allianzmlp@gmail.com';
-
   if (!resendApiKey || !fromEmail) {
     response.statusCode = 500;
     response.setHeader('Content-Type', 'application/json');
@@ -67,7 +56,10 @@ export default async function handler(request: IncomingMessage, response: Server
 
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: ['Bearer', resendApiKey].join(' '),
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         from: fromEmail,
         to: [recipient],
