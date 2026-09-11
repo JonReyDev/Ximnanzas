@@ -60,7 +60,7 @@ export function Navbar({ onSchedule, dark = false }: NavbarProps) {
           onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
           style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
         >
-          <span style={{ background: 'var(--paper)', padding: '4px 8px', borderRadius: '3px', boxShadow: '0 2px 8px rgba(10, 22, 40, 0.08)' }}>
+          <span style={{ padding: '4px 8px'}}>
             <img
               src="/XIMNANZAS.png"
               alt="XIMNANZAS, asesor patrimonial"

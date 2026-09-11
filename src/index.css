@@ -509,11 +509,7 @@
   .prospectos-login-card p { color: var(--muted); font-size: 0.9rem; }
   .prospectos-header { display: flex; max-width: 1200px; margin: 0 auto 40px; align-items: end; justify-content: space-between; gap: 24px; }
   .prospectos-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-<<<<<<< HEAD
-  .prospectos-error { margin: 0 auto 20px; max-width: 1200px; color: #b91c1c; font-size: 0.9rem; }
-=======
   .prospectos-error { margin: 0 auto 20px; max-width: 1200px; color: var(--destructive); font-size: 0.9rem; }
->>>>>>> refs/remotes/origin/main
   .prospectos-tabs { display: flex; max-width: 1200px; margin: 0 auto 16px; gap: 6px; border-bottom: 1px solid var(--line); }
   .prospectos-tabs button { padding: 12px 16px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); cursor: pointer; font-family: inherit; font-size: 0.86rem; font-weight: 700; }
   .prospectos-tabs button.active { border-bottom-color: var(--blue); color: var(--blue); }
@@ -705,10 +701,6 @@
   .product-benefits-grid { grid-template-columns: 1fr; }
   .product-benefit { padding: 24px; }
   .product-others { padding: 72px 0; }
-<<<<<<< HEAD
   .Simulador-card { padding: 28px !important; }
-=======
-  .calculator-card { padding: 28px !important; }
->>>>>>> refs/remotes/origin/main
   .calc-result strong { font-size: 2.2rem !important; }
 }
