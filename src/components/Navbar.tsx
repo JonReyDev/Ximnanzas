@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { CalendarDays, Menu, X } from 'lucide-react';
 import { navigate } from '@/lib/router';
 
 type NavbarProps = {
   onSchedule: () => void;
+  dark?: boolean;
 };
 
 const NAV_LINKS = [
-  { label: 'Beneficios', href: '#beneficios' },
-  { label: 'Calculadora', href: '#calculadora' },
-  { label: 'Servicios', href: '#servicios' },
-  { label: 'Ideas', href: '#ideas' },
-  { label: 'Preguntas', href: '#faq' },
-  { label: 'Contacto', href: '#contacto' },
+  { label: 'Simulador', href: '#simulador', testId: 'nav-simulator-link' },
+  { label: 'La idea', href: '#beneficios', testId: 'nav-benefits-link' },
+  { label: 'Ideas', href: '#ideas', testId: 'nav-ideas-link' },
+  { label: 'Servicios', href: '#servicios', testId: 'nav-services-link' },
+  { label: 'Contacto', href: '#contacto', testId: 'nav-contact-link' },
 ];
 
-export function Navbar({ onSchedule }: NavbarProps) {
+export function Navbar({ onSchedule, dark = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -36,8 +36,11 @@ export function Navbar({ onSchedule }: NavbarProps) {
     }
   };
 
+  const solid = scrolled || !dark;
+
   return (
     <header
+      data-testid="site-header"
       style={{
         position: 'fixed',
         top: 0,
@@ -45,18 +48,29 @@ export function Navbar({ onSchedule }: NavbarProps) {
         right: 0,
         zIndex: 50,
         transition: 'all 0.4s ease',
-        background: scrolled ? 'rgba(250, 248, 245, 0.92)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(16px)' : 'none',
-        borderBottom: scrolled ? '1px solid var(--line)' : '1px solid transparent',
+        background: solid ? 'rgba(244, 242, 237, 0.92)' : 'transparent',
+        backdropFilter: solid ? 'blur(16px)' : 'none',
+        borderBottom: solid ? '1px solid var(--line)' : '1px solid transparent',
+        color: solid ? 'var(--ink)' : 'var(--paper)',
       }}
     >
-      <nav className="container-wide" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
+      <nav className="container-wide" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: '72px' }}>
         <button
+          data-testid="header-logo-link"
           onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
         >
-          <span className="mono" style={{ color: scrolled ? 'var(--ink)' : 'var(--paper)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.06em' }}>
-            XIMNANZAS
+          <span style={{ padding: '4px 8px'}}>
+            <img
+              src="/XIMNANZAS.png"
+              alt="XIMNANZAS, asesor patrimonial"
+              data-testid="header-brand-logo"
+              style={{ display: 'block', width: '68px', height: '48px', objectFit: 'contain' }}
+            />
+          </span>
+          <span className="nav-brand-copy">
+            <strong style={{ display: 'block', color: solid ? '#003781' : 'var(--paper)', fontSize: '0.9rem', letterSpacing: '0.08em' }}>XIMNANZAS</strong>
+            <small style={{ display: 'block', marginTop: '4px', color: solid ? 'var(--muted)' : 'rgba(250,248,245,0.7)', fontSize: '0.56rem', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Planeación que sí se cumple</small>
           </span>
         </button>
 
@@ -64,12 +78,13 @@ export function Navbar({ onSchedule }: NavbarProps) {
           {NAV_LINKS.map((link) => (
             <button
               key={link.href}
+              data-testid={link.testId}
               onClick={() => handleNav(link.href)}
               style={{
                 padding: '8px 14px',
                 fontSize: '0.85rem',
                 fontWeight: 500,
-                color: scrolled ? 'var(--ink-soft)' : 'rgba(250,248,245,0.8)',
+                color: solid ? 'var(--ink-soft)' : 'rgba(250,248,245,0.8)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
@@ -84,17 +99,19 @@ export function Navbar({ onSchedule }: NavbarProps) {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
+            data-testid="header-agenda-button"
             onClick={onSchedule}
-            className="button button-primary"
-            style={{ padding: '10px 20px', fontSize: '0.82rem' }}
+            className="button header-schedule-button"
+            style={{ padding: '12px 20px', fontSize: '0.68rem', borderRadius: 0, background: solid ? '#003781' : 'var(--paper)', color: solid ? 'white' : '#003781', textTransform: 'uppercase', letterSpacing: '0.16em' }}
           >
-            Agenda una cita <ArrowRight size={14} />
+            Agenda una charla <CalendarDays size={15} />
           </button>
           <button
+            data-testid="header-menu-button"
             onClick={() => setOpen(!open)}
             className="menu-toggle"
-            style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: scrolled ? 'var(--ink)' : 'var(--paper)' }}
-            aria-label="Menu"
+            style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: solid ? 'var(--ink)' : 'var(--paper)' }}
+            aria-label="Abrir menú"
           >
             {open ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -102,19 +119,20 @@ export function Navbar({ onSchedule }: NavbarProps) {
       </nav>
 
       {open && (
-        <div className="mobile-menu" style={{ display: 'none' }}>
+        <div className="mobile-menu" style={{ display: 'block' }}>
           <div style={{ background: 'var(--paper)', padding: '16px 24px', borderBottom: '1px solid var(--line)' }}>
             {NAV_LINKS.map((link) => (
               <button
                 key={link.href}
+                data-testid={`${link.testId}-mobile`}
                 onClick={() => handleNav(link.href)}
                 style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 0', fontSize: '0.9rem', fontWeight: 500, color: 'var(--ink)', background: 'none', border: 'none', cursor: 'pointer' }}
               >
                 {link.label}
               </button>
             ))}
-            <button onClick={() => { setOpen(false); onSchedule(); }} className="button button-primary" style={{ marginTop: '12px', width: '100%', justifyContent: 'center' }}>
-              Agenda una cita
+            <button data-testid="header-agenda-button-mobile" onClick={() => { setOpen(false); onSchedule(); }} className="button button-primary" style={{ marginTop: '12px', width: '100%', justifyContent: 'center', borderRadius: 0 }}>
+              Quiero empezar
             </button>
           </div>
         </div>
