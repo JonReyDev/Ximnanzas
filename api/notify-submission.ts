@@ -37,7 +37,8 @@ export default async function handler(request: IncomingMessage, response: Server
 
   const resendApiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL;
-  const recipient = process.env.NOTIFICATION_EMAIL ?? 'ximenalalith.allianzmlp@gmail.com';
+  const recipient =
+    process.env.NOTIFICATION_EMAIL ?? 'ximenalalith.allianzmlp@gmail.com';
   if (!resendApiKey || !fromEmail) {
     response.statusCode = 500;
     response.setHeader('Content-Type', 'application/json');
