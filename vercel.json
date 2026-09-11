@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.ximnanzas.com"
+        }
+      ],
+      "destination": "https://ximnanzas.com/$1",
+      "permanent": true
+    }
+  ]
+}

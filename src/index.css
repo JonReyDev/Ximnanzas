@@ -3,19 +3,20 @@
 @tailwind utilities;
 @layer base {
   :root {
-    --ink: #0a1628;
-    --ink-soft: #1a2b42;
-    --paper: #faf8f5;
-    --paper-warm: #f5f1ea;
-    --blue: #0033a0;
-    --blue-bright: #0066ff;
-    --blue-deep: #001e5f;
-    --blue-glow: rgba(0, 102, 255, 0.12);
-    --amber: #c8a44e;
-    --amber-soft: #e8d5a0;
-    --line: rgba(10, 22, 40, 0.08);
-    --line-soft: rgba(10, 22, 40, 0.04);
-    --muted: #6b7280;
+    --ink: #123248;
+    --ink-soft: #294d60;
+    --paper: #f4f2ed;
+    --paper-warm: #eef0ed;
+    --blue: #294d60;
+    --blue-bright: #c5a35f;
+    --blue-deep: #123248;
+    --blue-glow: rgba(41, 77, 96, 0.12);
+    --amber: #c5a35f;
+    --amber-soft: #dfc891;
+    --line: #c6d0d2;
+    --line-soft: rgba(198, 208, 210, 0.55);
+    --muted: #6f8187;
+    --destructive: #963d35;
   }
 
   * { -webkit-font-smoothing: antialiased; }
@@ -508,7 +509,11 @@
   .prospectos-login-card p { color: var(--muted); font-size: 0.9rem; }
   .prospectos-header { display: flex; max-width: 1200px; margin: 0 auto 40px; align-items: end; justify-content: space-between; gap: 24px; }
   .prospectos-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+<<<<<<< HEAD
   .prospectos-error { margin: 0 auto 20px; max-width: 1200px; color: #b91c1c; font-size: 0.9rem; }
+=======
+  .prospectos-error { margin: 0 auto 20px; max-width: 1200px; color: var(--destructive); font-size: 0.9rem; }
+>>>>>>> refs/remotes/origin/main
   .prospectos-tabs { display: flex; max-width: 1200px; margin: 0 auto 16px; gap: 6px; border-bottom: 1px solid var(--line); }
   .prospectos-tabs button { padding: 12px 16px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); cursor: pointer; font-family: inherit; font-size: 0.86rem; font-weight: 700; }
   .prospectos-tabs button.active { border-bottom-color: var(--blue); color: var(--blue); }
@@ -682,6 +687,7 @@
 
 @media (max-width: 768px) {
   .nav-links { display: none !important; }
+  .header-schedule-button { display: none !important; }
   .menu-toggle { display: block !important; }
   .mobile-menu { display: block !important; }
   .benefit-row { grid-template-columns: 1fr !important; gap: 24px !important; direction: ltr !important; }
@@ -699,6 +705,10 @@
   .product-benefits-grid { grid-template-columns: 1fr; }
   .product-benefit { padding: 24px; }
   .product-others { padding: 72px 0; }
+<<<<<<< HEAD
   .Simulador-card { padding: 28px !important; }
+=======
+  .calculator-card { padding: 28px !important; }
+>>>>>>> refs/remotes/origin/main
   .calc-result strong { font-size: 2.2rem !important; }
 }

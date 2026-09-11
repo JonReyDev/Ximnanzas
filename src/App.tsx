@@ -51,7 +51,11 @@ function App() {
             <Hero onSchedule={() => openSchedule(undefined)} />
             <Marquee />
             <Benefits />
+<<<<<<< HEAD
             <Simulador onContact={() => openSchedule(undefined)} />
+=======
+            <Calculator onContact={() => openSchedule(undefined)} />
+>>>>>>> refs/remotes/origin/main
             <LogoStrip />
             <BentoGrid />
             <Testimonials />

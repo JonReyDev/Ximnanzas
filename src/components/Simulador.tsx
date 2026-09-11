@@ -113,8 +113,8 @@ export function Simulador({ onContact }: SimuladorProps) {
             <svg viewBox={`0 0 ${chartW} ${chartH}`} style={{ width: '100%', height: 'auto' }} preserveAspectRatio="xMidYMid meet">
               <defs>
                 <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0066ff" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="#0066ff" stopOpacity="0.02" />
+                  <stop offset="0%" stopColor="#c5a35f" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="#c5a35f" stopOpacity="0.02" />
                 </linearGradient>
               </defs>
               {[0, 0.25, 0.5, 0.75, 1].map((t) => (

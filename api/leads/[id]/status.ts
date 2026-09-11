@@ -1,9 +1,31 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+<<<<<<< HEAD
 import { createClient } from '@supabase/supabase-js';
+=======
+import { createContextClient, verifyCredentials } from '@supabase/server/core';
+>>>>>>> refs/remotes/origin/main
 
 type Status = 'Nuevo' | 'Contactado' | 'En seguimiento' | 'Cerrado';
 const VALID_STATUSES: Status[] = ['Nuevo', 'Contactado', 'En seguimiento', 'Cerrado'];
 
+<<<<<<< HEAD
+=======
+type Database = {
+  public: {
+    Tables: {
+      leads: {
+        Row: { id: string; status: string | null };
+        Insert: { id?: string; status?: string | null };
+        Update: { status?: string | null };
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+  };
+};
+
+>>>>>>> refs/remotes/origin/main
 type RequestWithQuery = IncomingMessage & { body?: unknown; query?: Record<string, string | string[]> };
 
 type RequestBody = {
@@ -56,6 +78,7 @@ export default async function handler(request: RequestWithQuery, response: Serve
       return;
     }
 
+<<<<<<< HEAD
     const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
     const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY
       ?? process.env.SUPABASE_ANON_KEY
@@ -71,10 +94,23 @@ export default async function handler(request: RequestWithQuery, response: Serve
     });
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     if (userError || !userData.user) {
+=======
+    const { data: auth, error: authError } = await verifyCredentials(
+      { token, apikey: null },
+      { auth: 'user' },
+    );
+    if (authError || !auth?.token) {
+>>>>>>> refs/remotes/origin/main
       sendJson(response, 401, { error: 'JWT invalido o expirado.' });
       return;
     }
 
+<<<<<<< HEAD
+=======
+    const supabase = createContextClient<Database>({
+      auth: { token: auth.token, keyName: auth.keyName },
+    });
+>>>>>>> refs/remotes/origin/main
     const { data, error } = await supabase
       .from('leads')
       .update({ status: body.status })

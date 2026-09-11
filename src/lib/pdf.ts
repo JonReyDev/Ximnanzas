@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import { jsPDF } from 'jspdf';
 import { formatCurrency, type ProjectionYear } from './Simulador';
+=======
+import { formatCurrency, type ProjectionYear } from './calculator';
+>>>>>>> refs/remotes/origin/main
 
 type PDFParams = {
   age: number;
@@ -23,6 +27,10 @@ async function loadLogoDataUrl() {
 }
 
 export async function generateProjectionPDF(projection: ProjectionYear[], params: PDFParams) {
+<<<<<<< HEAD
+=======
+  const { jsPDF } = await import('jspdf');
+>>>>>>> refs/remotes/origin/main
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210;
   const pageH = 297;

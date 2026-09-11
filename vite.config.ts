@@ -20,5 +20,20 @@ export default defineConfig(({ mode }) => {
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+<<<<<<< HEAD
+=======
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          motion: ['framer-motion'],
+          icons: ['lucide-react'],
+          supabase: ['@supabase/supabase-js'],
+        },
+      },
+    },
+  },
+>>>>>>> refs/remotes/origin/main
   };
 });
