@@ -20,8 +20,6 @@ export default defineConfig(({ mode }) => {
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-<<<<<<< HEAD
-=======
   build: {
     rollupOptions: {
       output: {
@@ -34,6 +32,5 @@ export default defineConfig(({ mode }) => {
       },
     },
   },
->>>>>>> refs/remotes/origin/main
   };
 });
