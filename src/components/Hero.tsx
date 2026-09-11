@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Send, Loader2, CheckCircle2 } from 'lucide-react';
 import { supabase, type Lead } from '@/lib/supabase';
+import { notifySubmission } from '@/lib/supabase';
 import { whatsappLink } from '@/lib/whatsapp';
 
 type HeroProps = {
@@ -78,6 +79,7 @@ export function Hero({ onSchedule }: HeroProps) {
       setLoading(false);
       return;
     }
+    await notifySubmission('lead', lead);
     const waMessage = `Hola, quiero informacion sobre un Plan Personal de Retiro.\n\nNombre: ${form.name}\nEmail: ${form.email}\nTelefono: ${form.phone}\nInteres: ${form.interest}\nMensaje: ${form.message || 'Sin mensaje adicional'}`;
     window.open(whatsappLink(waMessage, WHATSAPP_NUMBER), '_blank');
     setSubmitted(true);

@@ -9,32 +9,56 @@ type PDFParams = {
   rate: number;
 };
 
-export function generateProjectionPDF(projection: ProjectionYear[], params: PDFParams) {
+async function loadLogoDataUrl() {
+  const response = await fetch('/Ximnanzas_Logo.png');
+  if (!response.ok) throw new Error('No se pudo cargar el logo de Ximnanzas');
+
+  const blob = await response.blob();
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+export async function generateProjectionPDF(projection: ProjectionYear[], params: PDFParams) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210;
   const pageH = 297;
   const margin = 20;
   let y = 0;
+  let logoDataUrl: string | null = null;
 
-  // Header band
-  doc.setFillColor(15, 32, 80); // allianz-950
-  doc.rect(0, 0, pageW, 45, 'F');
-  doc.setFillColor(47, 112, 245); // allianz-500
-  doc.rect(0, 45, pageW, 2, 'F');
+  try {
+    logoDataUrl = await loadLogoDataUrl();
+  } catch {
+    // El documento puede generarse aunque el recurso de marca no cargue.
+  }
 
-  // Logo text
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(20);
-  doc.text('Finanzas con Proposito', margin, 22);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(142, 188, 255);
-  doc.text('Proyeccion de retiro personalizada', margin, 32);
+  const drawHeader = () => {
+    doc.setFillColor(15, 32, 80);
+    doc.rect(0, 0, pageW, 45, 'F');
+    doc.setFillColor(47, 112, 245);
+    doc.rect(0, 45, pageW, 2, 'F');
 
-  // Date
-  doc.setFontSize(9);
-  doc.text(`Fecha: ${new Date().toLocaleDateString('es-MX')}`, pageW - margin, 22, { align: 'right' });
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, 'PNG', margin, 4, 27, 34);
+    }
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text('Proyeccion financiera', margin + 35, 22);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(142, 188, 255);
+    doc.text('Plan Personal de Retiro', margin + 35, 32);
+    doc.setFontSize(9);
+    doc.text(`Fecha: ${new Date().toLocaleDateString('es-MX')}`, pageW - margin, 22, { align: 'right' });
+  };
+
+  drawHeader();
 
   y = 60;
 
@@ -99,8 +123,8 @@ export function generateProjectionPDF(projection: ProjectionYear[], params: PDFP
   projection.forEach((row, i) => {
     if (i > 0 && i % maxRowsPerPage === 0) {
       doc.addPage();
-      y = margin;
-      // Re-draw header
+      drawHeader();
+      y = 60;
       doc.setFillColor(15, 32, 80);
       doc.rect(margin, y, pageW - margin * 2, 10, 'F');
       doc.setTextColor(255, 255, 255);
@@ -134,15 +158,18 @@ export function generateProjectionPDF(projection: ProjectionYear[], params: PDFP
   const pageCount = doc.getNumberOfPages();
   for (let p = 1; p <= pageCount; p++) {
     doc.setPage(p);
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, 'PNG', margin, pageH - 27, 14, 18);
+    }
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.text(
-      'Finanzas con Proposito  |  Polanco, CDMX  |  +52 55 1234 5678  |  hola@finanzasproposito.mx',
-      pageW / 2,
-      pageH - 10,
+      'Proyeccion de retiro personalizada',
+      margin + 18,
+      pageH - 14,
       { align: 'center' },
     );
-    doc.text(`Pagina ${p} de ${pageCount}`, pageW - margin, pageH - 10, { align: 'right' });
+    doc.text(`Pagina ${p} de ${pageCount}`, pageW - margin, pageH - 14, { align: 'right' });
   }
 
   doc.save('proyeccion-retiro.pdf');

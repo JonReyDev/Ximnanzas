@@ -2,6 +2,7 @@ export type ServiceSlug = 'seguro-de-vida' | 'inversion-inteligente' | 'gastos-m
 
 export type Service = {
   slug: ServiceSlug;
+  chapter: string;
   title: string;
   tagline: string;
   description: string;
@@ -15,6 +16,7 @@ export type Service = {
 export const SERVICES: Service[] = [
   {
     slug: 'seguro-de-vida',
+    chapter: '01',
     title: 'Seguro de Vida',
     tagline: 'Protege lo que más amas',
     description:
@@ -32,6 +34,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: 'inversion-inteligente',
+    chapter: '02',
     title: 'Inversión Inteligente',
     tagline: 'Haz crecer tu dinero con propósito',
     description:
@@ -49,6 +52,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: 'gastos-medicos-mayores',
+    chapter: '03',
     title: 'Gastos Médicos Mayores',
     tagline: 'Tu salud, sin sorpresas',
     description:
@@ -66,6 +70,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: 'auto-y-hogar',
+    chapter: '04',
     title: 'Auto y Hogar',
     tagline: 'Tus bienes, siempre protegidos',
     description:

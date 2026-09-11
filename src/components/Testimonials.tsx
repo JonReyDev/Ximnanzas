@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Send, CheckCircle2, Star } from 'lucide-react';
-import { supabase, type Lead } from '@/lib/supabase';
+import { notifySubmission, supabase, type Lead } from '@/lib/supabase';
 import { IMAGES } from '@/lib/images';
 
 const TESTIMONIALS = [
@@ -31,28 +31,9 @@ type TestimonialsProps = {
   onSchedule: () => void;
 };
 
-export function Testimonials({ onSchedule }: TestimonialsProps) {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) return;
-    setStatus('submitting');
-    const lead: Omit<Lead, 'id'> = {
-      name: form.name, email: form.email, phone: form.phone, message: form.message,
-    };
-    const { error } = await supabase.from('leads').insert([lead]);
-    if (error) { setStatus('error'); return; }
-    setStatus('success');
-    setForm({ name: '', email: '', phone: '', message: '' });
-    setTimeout(() => setStatus('idle'), 5000);
-  };
-
+export function Testimonials() {
   return (
-    <>
-      {/* Testimonials */}
-      <section id="testimonios" className="section" style={{ background: 'var(--paper)' }}>
+    <section id="testimonios" className="section" style={{ background: 'var(--paper)' }}>
         <div className="container-wide">
           <div style={{ maxWidth: '640px', marginBottom: '64px' }}>
             <span className="section-kicker">Testimonios</span>
@@ -82,8 +63,29 @@ export function Testimonials({ onSchedule }: TestimonialsProps) {
           </div>
         </div>
       </section>
+  );
+}
 
-      {/* Lead capture */}
+export function ContactSection({ onSchedule }: TestimonialsProps) {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) return;
+    setStatus('submitting');
+    const lead: Omit<Lead, 'id'> = {
+      name: form.name, email: form.email, phone: form.phone, message: form.message,
+    };
+    const { error } = await supabase.from('leads').insert([lead]);
+    if (error) { setStatus('error'); return; }
+    await notifySubmission('lead', lead);
+    setStatus('success');
+    setForm({ name: '', email: '', phone: '', message: '' });
+    setTimeout(() => setStatus('idle'), 5000);
+  };
+
+  return (
       <section id="contacto" className="section" style={{ background: 'var(--ink)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '0', right: '0', width: '400px', height: '400px', borderRadius: '50%', background: 'rgba(0,102,255,0.08)', filter: 'blur(80px)' }} />
 
@@ -143,6 +145,5 @@ export function Testimonials({ onSchedule }: TestimonialsProps) {
           </div>
         </div>
       </section>
-    </>
   );
 }

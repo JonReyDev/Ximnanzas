@@ -3,7 +3,6 @@ import { Download, Sparkles, ArrowRight } from 'lucide-react';
 import {
   RISK_PROFILES,
   calculateProjection,
-  formatCurrency,
   formatCompact,
   type RiskProfile,
 } from '@/lib/calculator';
