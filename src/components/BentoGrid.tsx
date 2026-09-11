@@ -1,8 +1,14 @@
-import { ArrowUpRight } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import { ArrowUpRight, HeartPulse, ShieldCheck, Stethoscope, TrendingUp } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { SERVICES } from '@/lib/services';
 import { navigate } from '@/lib/router';
+
+const serviceIcons: Record<string, LucideIcon> = {
+  HeartPulse,
+  ShieldCheck,
+  Stethoscope,
+  TrendingUp,
+};
 
 export function BentoGrid() {
   return (
@@ -19,7 +25,7 @@ export function BentoGrid() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }} className="bento-grid">
           {SERVICES.map((service, i) => {
-            const Icon = (Icons as unknown as Record<string, LucideIcon>)[service.icon] ?? Icons.ShieldCheck;
+            const Icon = serviceIcons[service.icon] ?? ShieldCheck;
             const isLarge = i === 0 || i === 3;
             return (
               <button

@@ -1,4 +1,3 @@
-import { jsPDF } from 'jspdf';
 import { formatCurrency, type ProjectionYear } from './calculator';
 
 type PDFParams = {
@@ -23,6 +22,7 @@ async function loadLogoDataUrl() {
 }
 
 export async function generateProjectionPDF(projection: ProjectionYear[], params: PDFParams) {
+  const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210;
   const pageH = 297;
