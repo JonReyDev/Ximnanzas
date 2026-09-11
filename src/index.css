@@ -515,6 +515,19 @@
   .prospectos-table-section { max-width: 1200px; margin: 0 auto 32px; padding: 24px; background: white; border: 1px solid var(--line); border-radius: 12px; }
   .prospectos-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
   .prospectos-table-section h2 { margin-bottom: 18px; color: var(--ink); font-family: 'Melodrama', serif; font-size: 1.5rem; font-weight: 500; }
+  .prospectos-blog-layout { display: grid; grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr); max-width: 1200px; margin: 0 auto; gap: 24px; }
+  .prospectos-post-form { display: grid; align-content: start; gap: 14px; margin: 0; }
+  .prospectos-post-form h2 { margin-bottom: 0; }
+  .prospectos-publish-toggle { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-size: 0.84rem; }
+  .prospectos-publish-toggle input { accent-color: var(--blue); }
+  .prospectos-empty { color: var(--muted); font-size: 0.9rem; }
+  .prospectos-post-list { display: grid; gap: 0; }
+  .prospectos-post-item { display: flex; justify-content: space-between; gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .prospectos-post-item:first-child { padding-top: 0; }
+  .prospectos-post-item:last-child { border-bottom: 0; padding-bottom: 0; }
+  .prospectos-post-item h3 { margin: 4px 0 6px; color: var(--ink); font-family: 'Melodrama', serif; font-size: 1.2rem; font-weight: 500; }
+  .prospectos-post-item p { color: var(--muted); font-size: 0.86rem; line-height: 1.5; }
+  .prospectos-post-item small { flex-shrink: 0; color: var(--muted); font-size: 0.75rem; }
   .prospectos-table-wrap { overflow-x: auto; }
   .prospectos-table-section table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 0.84rem; }
   .prospectos-table-section th, .prospectos-table-section td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
@@ -522,6 +535,7 @@
   @media (max-width: 768px) {
     .prospectos-header, .prospectos-section-heading { align-items: flex-start; flex-direction: column; }
     .prospectos-section-heading h2 { margin-bottom: 0; }
+    .prospectos-blog-layout { grid-template-columns: 1fr; }
   }
 }
 

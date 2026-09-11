@@ -55,3 +55,13 @@ export type Appointment = {
   status?: string;
   created_at?: string;
 };
+
+export type BlogPost = {
+  id?: string;
+  tag: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  published: boolean;
+  created_at?: string;
+};
