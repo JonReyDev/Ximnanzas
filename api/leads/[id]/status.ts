@@ -14,8 +14,8 @@ type Database = {
         Relationships: [];
       };
     };
-    Views: {};
-    Functions: {};
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
   };
 };
 
