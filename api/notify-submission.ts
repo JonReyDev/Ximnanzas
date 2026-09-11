@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import nodemailer from 'nodemailer';
 
 type SubmissionType = 'lead' | 'appointment';
 type Payload = Record<string, unknown>;
@@ -18,7 +19,7 @@ function escapeHtml(value: unknown): string {
 }
 
 function subjectFor(type: SubmissionType, payload: Payload): string {
-  const name = escapeHtml(payload.name);
+  const name = escapeHtml(typeof payload.name === 'string' ? payload.name : 'Cliente');
   return type === 'appointment' ? `Nueva cita solicitada - ${name}` : `Nuevo prospecto - ${name}`;
 }
 
@@ -45,14 +46,17 @@ export default async function handler(request: IncomingMessage, response: Server
     return;
   }
 
-  const resendApiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.RESEND_FROM_EMAIL;
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = Number(process.env.SMTP_PORT ?? 587);
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpFrom = process.env.SMTP_FROM;
   const recipient = process.env.NOTIFICATION_EMAIL ?? 'ximenalalith.allianzmlp@gmail.com';
 
-  if (!resendApiKey || !fromEmail) {
+  if (!smtpHost || !smtpUser || !smtpPass || !smtpFrom) {
     response.statusCode = 500;
     response.setHeader('Content-Type', 'application/json');
-    response.end(JSON.stringify({ error: 'Configura RESEND_API_KEY y RESEND_FROM_EMAIL en Vercel.' }));
+    response.end(JSON.stringify({ error: 'Configura SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS y SMTP_FROM en Vercel.' }));
     return;
   }
 
@@ -65,32 +69,31 @@ export default async function handler(request: IncomingMessage, response: Server
       return;
     }
 
-    const resendResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [recipient],
-        reply_to: typeof payload.email === 'string' ? payload.email : undefined,
-        subject: subjectFor(type, payload),
-        html: htmlFor(type, payload),
-      }),
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
     });
 
-    if (!resendResponse.ok) {
-      console.error('Resend rechazo el envio:', await resendResponse.text());
-      response.statusCode = 502;
-      response.setHeader('Content-Type', 'application/json');
-      response.end(JSON.stringify({ error: 'Resend rechazo el envio.' }));
-      return;
-    }
+    await transporter.sendMail({
+      from: smtpFrom,
+      to: recipient,
+      replyTo: typeof payload.email === 'string' ? payload.email : undefined,
+      subject: subjectFor(type, payload),
+      html: htmlFor(type, payload),
+    });
 
     response.statusCode = 200;
     response.setHeader('Content-Type', 'application/json');
     response.end(JSON.stringify({ ok: true }));
-  } catch {
-    response.statusCode = 400;
+  } catch (error) {
+    console.error('SMTP envio fallido:', error);
+    response.statusCode = 502;
     response.setHeader('Content-Type', 'application/json');
-    response.end(JSON.stringify({ error: 'Solicitud invalida.' }));
+    response.end(JSON.stringify({ error: 'No se pudo enviar el correo por SMTP.' }));
   }
 }
