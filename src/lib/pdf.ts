@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { formatCurrency, type ProjectionYear } from './calculator';
+import { formatCurrency, type ProjectionYear } from './Simulador';
 
 type PDFParams = {
   age: number;

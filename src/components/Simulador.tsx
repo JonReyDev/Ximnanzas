@@ -5,14 +5,14 @@ import {
   calculateProjection,
   formatCompact,
   type RiskProfile,
-} from '@/lib/calculator';
+} from '@/lib/Simulador';
 import { generateProjectionPDF } from '@/lib/pdf';
 
-type CalculatorProps = {
+type SimuladorProps = {
   onContact: () => void;
 };
 
-export function Calculator({ onContact }: CalculatorProps) {
+export function Simulador({ onContact }: SimuladorProps) {
   const [age, setAge] = useState(30);
   const [monthly, setMonthly] = useState(5000);
   const [years, setYears] = useState(30);
@@ -51,7 +51,7 @@ export function Calculator({ onContact }: CalculatorProps) {
 
   return (
     <section id="calculadora" className="section" style={{ background: 'var(--paper-warm)' }}>
-      <div className="container-wide calculator-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '48px', alignItems: 'center' }}>
+      <div className="container-wide Simulador-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '48px', alignItems: 'center' }}>
         {/* Left: text */}
         <div>
           <div className="section-kicker">Una primera aproximacion</div>
@@ -87,14 +87,14 @@ export function Calculator({ onContact }: CalculatorProps) {
             <p style={{ fontSize: '0.82rem', color: 'var(--muted)', marginTop: '10px' }}>{profile.description}</p>
           </div>
 
-          <button onClick={onContact} className="button button-primary" style={{ marginTop: '28px' }} data-testid="button-calculator-contact">
+          <button onClick={onContact} className="button button-primary" style={{ marginTop: '28px' }} data-testid="button-Simulador-contact">
             Quiero un calculo a mi medida <ArrowRight size={15} />
           </button>
         </div>
 
-        {/* Right: calculator card */}
-        <div className="calculator-card" data-testid="card-calculator">
-          <div className="calculator-top">
+        {/* Right: Simulador card */}
+        <div className="Simulador-card" data-testid="card-Simulador">
+          <div className="Simulador-top">
             <span className="mono">Simulador de constancia</span>
             <Sparkles size={18} style={{ color: 'rgba(255,255,255,0.4)' }} />
           </div>
@@ -133,7 +133,7 @@ export function Calculator({ onContact }: CalculatorProps) {
           {/* Sliders */}
           <label className="range-label">
             Aportacion mensual <b>${monthly.toLocaleString('es-MX')}</b>
-            <input type="range" min={500} max={50000} step={500} value={monthly} onChange={(e) => setMonthly(Number(e.target.value))} data-testid="input-calculator-monthly" />
+            <input type="range" min={500} max={50000} step={500} value={monthly} onChange={(e) => setMonthly(Number(e.target.value))} data-testid="input-Simulador-monthly" />
           </label>
           <label className="range-label">
             Edad actual <b>{age} años</b>
@@ -141,7 +141,7 @@ export function Calculator({ onContact }: CalculatorProps) {
           </label>
           <label className="range-label">
             Plazo <b>{years} años</b>
-            <input type="range" min={5} max={40} value={years} onChange={(e) => setYears(Number(e.target.value))} data-testid="input-calculator-years" />
+            <input type="range" min={5} max={40} value={years} onChange={(e) => setYears(Number(e.target.value))} data-testid="input-Simulador-years" />
           </label>
 
           {/* Stats */}

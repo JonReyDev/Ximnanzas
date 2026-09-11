@@ -4,7 +4,7 @@ import { Footer } from '@/components/Footer';
 import { Hero } from '@/components/Hero';
 import { Marquee } from '@/components/Marquee';
 import { Benefits } from '@/components/Benefits';
-import { Calculator } from '@/components/Calculator';
+import { Simulador } from '@/components/Simulador';
 import { BentoGrid } from '@/components/BentoGrid';
 import { FAQ } from '@/components/FAQ';
 import { Journal } from '@/components/Journal';
@@ -51,7 +51,7 @@ function App() {
             <Hero onSchedule={() => openSchedule(undefined)} />
             <Marquee />
             <Benefits />
-            <Calculator onContact={() => openSchedule(undefined)} />
+            <Simulador onContact={() => openSchedule(undefined)} />
             <LogoStrip />
             <BentoGrid />
             <Testimonials />

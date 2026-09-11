@@ -17,7 +17,7 @@ const BENEFITS = [
       'El interes compuesto es la octava maravilla del mundo. Tu dinero no solo crece, sino que los rendimientos generan mas rendimientos. Mientras mas joven empiezas, mas exponencial es el crecimiento.',
     stat: '3x',
     statLabel: 'Mas rendimiento al empezar joven',
-    image: IMAGES.calculator,
+    image: IMAGES.Simulador,
   },
   {
     number: '03',

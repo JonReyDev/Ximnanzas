@@ -151,7 +151,7 @@ export function Hero({ onSchedule }: HeroProps) {
               className="mt-10 flex flex-wrap items-center gap-4"
             >
               <button
-                data-testid="hero-cta-calculator"
+                data-testid="hero-cta-Simulador"
                 onClick={() => scrollToSection('#calculadora')}
                 className="group inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold tracking-wide text-white transition-colors duration-300"
                 style={{ background: 'var(--amber)' }}

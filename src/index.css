@@ -192,14 +192,14 @@
   }
   .input::placeholder { color: #9ca3af; }
 
-  /* Calculator */
-  .calculator-card {
+  /* Simulador */
+  .Simulador-card {
     background: var(--ink);
     color: white;
     border-radius: 24px;
     padding: 40px;
   }
-  .calculator-top {
+  .Simulador-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -207,7 +207,7 @@
     padding-bottom: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
-  .calculator-top .mono { color: rgba(255, 255, 255, 0.5); }
+  .Simulador-top .mono { color: rgba(255, 255, 255, 0.5); }
   .calc-result {
     margin-bottom: 32px;
   }
@@ -588,19 +588,19 @@
 }
 
 /* Range slider — dark card variant */
-.calculator-card input[type='range'] {
+.Simulador-card input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
   cursor: pointer;
   height: 24px;
 }
-.calculator-card input[type='range']::-webkit-slider-runnable-track {
+.Simulador-card input[type='range']::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.15);
 }
-.calculator-card input[type='range']::-webkit-slider-thumb {
+.Simulador-card input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   margin-top: -8px;
@@ -612,13 +612,13 @@
   box-shadow: 0 2px 12px rgba(0, 102, 255, 0.4);
   transition: transform 0.15s;
 }
-.calculator-card input[type='range']::-webkit-slider-thumb:hover { transform: scale(1.2); }
-.calculator-card input[type='range']::-moz-range-track {
+.Simulador-card input[type='range']::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.Simulador-card input[type='range']::-moz-range-track {
   height: 4px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.15);
 }
-.calculator-card input[type='range']::-moz-range-thumb {
+.Simulador-card input[type='range']::-moz-range-thumb {
   height: 20px;
   width: 20px;
   border-radius: 50%;
@@ -674,7 +674,7 @@
   .benefits-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .testimonials-grid { grid-template-columns: 1fr !important; max-width: 500px; margin: 0 auto; }
   .journal-grid { grid-template-columns: repeat(2, 1fr) !important; }
-  .calculator-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .Simulador-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
   .faq-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
   .contact-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
   .footer-grid { grid-template-columns: 1fr 1fr !important; }
@@ -699,6 +699,6 @@
   .product-benefits-grid { grid-template-columns: 1fr; }
   .product-benefit { padding: 24px; }
   .product-others { padding: 72px 0; }
-  .calculator-card { padding: 28px !important; }
+  .Simulador-card { padding: 28px !important; }
   .calc-result strong { font-size: 2.2rem !important; }
 }
