@@ -2,25 +2,25 @@ import { motion } from "framer-motion";
 
 const LOGOS = [
   {
-    src: "/ALLIANZ.png",
+    src: "public/ALLIANZ.png",
     alt: "Allianz - Distribuidor Autorizado",
     id: "logo-allianz",
     h: "max-h-10",
   },
   {
-    src: "/amib.png",
+    src: "public/amib.png",
     alt: "AMIB - Asociación Mexicana de Instituciones Bursátiles",
     id: "logo-amib",
     h: "max-h-12",
   },
   {
-    src: "/CNS.png",
+    src: "public/CNS.png",
     alt: "CNSF - Comisión Nacional de Seguros y Fianzas",
     id: "logo-cnsf",
     h: "max-h-12",
   },
   {
-    src: "/XIMNANZAS.png",
+    src: "public/XIMNANZAS.png",
     alt: "Ximnanzas - Asesor Patrimonial",
     id: "logo-ximnanzas",
     h: "max-h-10",
