@@ -37,7 +37,7 @@ export async function generateProjectionPDF(projection: ProjectionYear[], params
   }
 
   const drawHeader = () => {
-    doc.setFillColor(15, 32, 80);
+    doc.setFillColor(132, 149, 196);
     doc.rect(0, 0, pageW, 45, 'F');
     doc.setFillColor(47, 112, 245);
     doc.rect(0, 45, pageW, 2, 'F');
