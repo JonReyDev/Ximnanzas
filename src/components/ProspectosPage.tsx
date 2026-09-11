@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Download, LogOut, RefreshCw } from 'lucide-react';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase, type BlogPost } from '@/lib/supabase';
 
 const LEAD_STATUSES = ['Nuevo', 'Contactado', 'En seguimiento', 'Cerrado'] as const;
 type LeadStatus = (typeof LEAD_STATUSES)[number];
@@ -50,16 +50,19 @@ export function ProspectosPage() {
   const [accessToken, setAccessToken] = useState('');
   const [leads, setLeads] = useState<Prospect[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'leads' | 'appointments'>('leads');
+  const [activeTab, setActiveTab] = useState<'leads' | 'appointments' | 'ideas'>('leads');
+  const [postForm, setPostForm] = useState({ tag: 'Ideas', title: '', excerpt: '', content: '', published: true });
 
   const loadData = async () => {
     setLoading(true);
     setError('');
-    const [{ data: leadRows, error: leadsError }, { data: appointmentRows, error: appointmentsError }] = await Promise.all([
+    const [{ data: leadRows, error: leadsError }, { data: appointmentRows, error: appointmentsError }, { data: postRows }] = await Promise.all([
       supabase.from('leads').select('*').order('created_at', { ascending: false }),
       supabase.from('appointments').select('*').order('created_at', { ascending: false }),
+      supabase.from('blog_posts').select('*').order('created_at', { ascending: false }),
     ]);
     setLoading(false);
     if (leadsError || appointmentsError) {
@@ -68,6 +71,7 @@ export function ProspectosPage() {
     }
     setLeads((leadRows ?? []) as Prospect[]);
     setAppointments((appointmentRows ?? []) as Appointment[]);
+    setPosts((postRows ?? []) as BlogPost[]);
   };
 
   useEffect(() => {
@@ -121,6 +125,20 @@ export function ProspectosPage() {
     appointment.name, appointment.phone, appointment.date, appointment.time, appointment.created_at ? new Date(appointment.created_at).toLocaleString('es-MX') : '',
   ]));
 
+  const savePost = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+    setError('');
+    const { data, error: postError } = await supabase.from('blog_posts').insert([postForm]).select('*').single();
+    setLoading(false);
+    if (postError) {
+      setError('No se pudo guardar la nota. Verifica que la migración del blog esté aplicada.');
+      return;
+    }
+    setPosts((current) => [data as BlogPost, ...current]);
+    setPostForm({ tag: 'Ideas', title: '', excerpt: '', content: '', published: true });
+  };
+
   if (!isSupabaseConfigured) {
     return <div className="prospectos-page"><h1>Panel de prospectos</h1><p>Configura Supabase para acceder al panel.</p></div>;
   }
@@ -151,11 +169,26 @@ export function ProspectosPage() {
       <div className="prospectos-tabs" role="tablist" aria-label="Datos del panel">
         <button className={activeTab === 'leads' ? 'active' : ''} onClick={() => setActiveTab('leads')} role="tab" aria-selected={activeTab === 'leads'}>Prospectos ({leads.length})</button>
         <button className={activeTab === 'appointments' ? 'active' : ''} onClick={() => setActiveTab('appointments')} role="tab" aria-selected={activeTab === 'appointments'}>Citas ({appointments.length})</button>
+        <button className={activeTab === 'ideas' ? 'active' : ''} onClick={() => setActiveTab('ideas')} role="tab" aria-selected={activeTab === 'ideas'}>Ideas / Blog ({posts.length})</button>
       </div>
       {activeTab === 'leads' ? (
         <section className="prospectos-table-section"><div className="prospectos-section-heading"><h2>Solicitudes de información</h2><button className="button button-ghost" onClick={exportLeads}><Download size={15} /> Exportar CSV</button></div><div className="prospectos-table-wrap"><table><thead><tr><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Estado</th><th>Mensaje</th></tr></thead><tbody>{leads.map((lead) => <tr key={lead.id}><td>{lead.created_at ? new Date(lead.created_at).toLocaleString('es-MX') : '-'}</td><td>{lead.name}</td><td>{lead.email}</td><td>{lead.phone}</td><td><select aria-label={`Estado de ${lead.name}`} value={lead.status} onChange={(event) => void updateLeadStatus(lead.id, event.target.value as LeadStatus)} style={{ ...statusColors[lead.status], border: 0, borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.78rem', fontWeight: 700, padding: '7px 10px' }}>{LEAD_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}</select></td><td>{lead.message || '-'}</td></tr>)}</tbody></table></div></section>
-      ) : (
+      ) : activeTab === 'appointments' ? (
         <section className="prospectos-table-section"><div className="prospectos-section-heading"><h2>Citas</h2><button className="button button-ghost" onClick={exportAppointments}><Download size={15} /> Exportar CSV</button></div><div className="prospectos-table-wrap"><table><thead><tr><th>Fecha de registro</th><th>Nombre</th><th>Servicio</th><th>Fecha solicitada</th><th>Hora</th><th>Estado</th></tr></thead><tbody>{appointments.map((appointment) => <tr key={appointment.id}><td>{appointment.created_at ? new Date(appointment.created_at).toLocaleString('es-MX') : '-'}</td><td>{appointment.name}</td><td>{appointment.service || '-'}</td><td>{appointment.date}</td><td>{appointment.time}</td><td>{appointment.status || 'pending'}</td></tr>)}</tbody></table></div></section>
+      ) : (
+        <section className="prospectos-blog-layout">
+          <form className="prospectos-table-section prospectos-post-form" onSubmit={savePost}>
+            <span className="section-kicker">Nueva nota</span>
+            <h2>Añadir idea al blog</h2>
+            <input className="input" placeholder="Categoría · ej. Retiro" value={postForm.tag} onChange={(event) => setPostForm({ ...postForm, tag: event.target.value })} required />
+            <input className="input" placeholder="Título de la nota" value={postForm.title} onChange={(event) => setPostForm({ ...postForm, title: event.target.value })} required />
+            <textarea className="input" placeholder="Resumen breve para la tarjeta" value={postForm.excerpt} onChange={(event) => setPostForm({ ...postForm, excerpt: event.target.value })} rows={3} required />
+            <textarea className="input" placeholder="Contenido completo de la nota" value={postForm.content} onChange={(event) => setPostForm({ ...postForm, content: event.target.value })} rows={8} required />
+            <label className="prospectos-publish-toggle"><input type="checkbox" checked={postForm.published} onChange={(event) => setPostForm({ ...postForm, published: event.target.checked })} /> Publicar en Ideas al guardar</label>
+            <button className="button button-primary" type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Guardar nota'}</button>
+          </form>
+          <section className="prospectos-table-section"><div className="prospectos-section-heading"><div><span className="section-kicker">Contenido</span><h2>Notas guardadas</h2></div></div>{posts.length === 0 ? <p className="prospectos-empty">Todavía no hay notas creadas.</p> : <div className="prospectos-post-list">{posts.map((post) => <article key={post.id} className="prospectos-post-item"><div><span className="section-kicker">{post.tag} · {post.published ? 'Publicada' : 'Borrador'}</span><h3>{post.title}</h3><p>{post.excerpt}</p></div><small>{post.created_at ? new Date(post.created_at).toLocaleDateString('es-MX') : '-'}</small></article>)}</div>}</section>
+        </section>
       )}
     </div>
   );

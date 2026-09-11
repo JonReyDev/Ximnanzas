@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, X } from 'lucide-react';
+import { supabase, type BlogPost } from '@/lib/supabase';
 
 const ARTICLES = [
   {
@@ -36,13 +37,33 @@ const ARTICLES = [
     testId: 'button-journal-habits',
   },
 ];
+type Article = (typeof ARTICLES)[number];
 
 type JournalProps = {
   onContact: () => void;
 };
 
 export function Journal({ onContact }: JournalProps) {
-  const [selectedArticle, setSelectedArticle] = useState<(typeof ARTICLES)[number] | null>(null);
+  const [articles, setArticles] = useState(ARTICLES);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadPosts = async () => {
+      const { data } = await supabase.from('blog_posts').select('id, tag, title, excerpt, content, published, created_at').eq('published', true).order('created_at', { ascending: false });
+      if (!mounted || !data?.length) return;
+      const publishedPosts = (data as BlogPost[]).map((post) => ({
+        tag: `${post.tag} · lectura`,
+        title: post.title,
+        excerpt: post.excerpt,
+        paragraphs: post.content.split(/\n+/).filter(Boolean),
+        testId: `button-blog-${post.id}`,
+      }));
+      setArticles([...publishedPosts, ...ARTICLES]);
+    };
+    void loadPosts();
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     if (!selectedArticle) return;
@@ -74,7 +95,7 @@ export function Journal({ onContact }: JournalProps) {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }} className="journal-grid">
-            {ARTICLES.map((article) => (
+            {articles.map((article) => (
               <article key={article.title} className="journal-card">
                 <small>{article.tag}</small>
                 <h3>{article.title}</h3>
