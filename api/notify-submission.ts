@@ -74,10 +74,11 @@ export default async function handler(request: IncomingMessage, response: Server
     });
 
     if (!resendResponse.ok) {
-      console.error('Resend rechazo el envio:', await resendResponse.text());
+      const resendError = await resendResponse.text();
+      console.error('Resend rechazo el envio:', resendError);
       response.statusCode = 502;
       response.setHeader('Content-Type', 'application/json');
-      response.end(JSON.stringify({ error: 'Resend rechazo el envio.' }));
+      response.end(JSON.stringify({ error: 'Resend rechazo el envio.', details: resendError }));
       return;
     }
 
