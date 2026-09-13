@@ -50,6 +50,7 @@ export function Navbar({ onSchedule, dark = false }: NavbarProps) {
         right: 0,
         zIndex: 50,
         transition: 'all 0.4s ease',
+        borderRadius: '8px',
         background: solid ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.72)',
         backdropFilter: 'blur(16px)',
         borderBottom: solid ? '1px solid var(--line)' : '1px solid rgba(255,255,255,0.2)',
