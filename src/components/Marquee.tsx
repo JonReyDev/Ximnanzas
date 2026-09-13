@@ -31,9 +31,13 @@ export function Marquee() {
           {[...PHRASES, ...PHRASES].map((phrase, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
               <span className="serif" style={{
-                fontSize: '1.35rem', fontWeight: 300, fontStyle: 'italic',
-                color: 'rgba(255,255,255,0.55)', letterSpacing: '0.01em',
+                fontFamily: '"Playfair Display", Georgia, serif',
+                fontSize: 'clamp(2rem, 3vw, 3.5rem)',
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.82)',
+                letterSpacing: '0.01em',
                 whiteSpace: 'nowrap',
+                lineHeight: 1.1,
               }}>
                 {phrase}
               </span>

@@ -50,9 +50,9 @@ export function Navbar({ onSchedule, dark = false }: NavbarProps) {
         right: 0,
         zIndex: 50,
         transition: 'all 0.4s ease',
-        background: solid ? 'rgba(244, 242, 237, 0.92)' : 'transparent',
-        backdropFilter: solid ? 'blur(16px)' : 'none',
-        borderBottom: solid ? '1px solid var(--line)' : '1px solid transparent',
+        background: solid ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.72)',
+        backdropFilter: 'blur(16px)',
+        borderBottom: solid ? '1px solid var(--line)' : '1px solid rgba(255,255,255,0.2)',
         color: solid ? 'var(--ink)' : 'var(--paper)',
       }}
     >
@@ -71,7 +71,7 @@ export function Navbar({ onSchedule, dark = false }: NavbarProps) {
             />
           </span>
           <span className="nav-brand-copy">
-            <strong style={{ display: 'block', color: solid ? '#003781' : 'var(--paper)', fontSize: '0.9rem', letterSpacing: '0.08em' }}>XIMNANZAS</strong>
+            <strong style={{ display: 'block', color: solid ? 'hsl(var(--secondary))' : 'var(--paper)', fontSize: '0.9rem', letterSpacing: '0.08em' }}>XIMNANZAS</strong>
             <small style={{ display: 'block', marginTop: '4px', color: solid ? 'var(--muted)' : 'rgba(250,248,245,0.7)', fontSize: '0.56rem', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Planeación que sí se cumple</small>
           </span>
         </button>
@@ -104,7 +104,7 @@ export function Navbar({ onSchedule, dark = false }: NavbarProps) {
             data-testid="header-agenda-button"
             onClick={onSchedule}
             className="button header-schedule-button"
-            style={{ padding: '12px 20px', fontSize: '0.68rem', borderRadius: 0, background: solid ? '#003781' : 'var(--paper)', color: solid ? 'white' : '#003781', textTransform: 'uppercase', letterSpacing: '0.16em' }}
+            style={{ padding: '12px 20px', fontSize: '0.68rem', borderRadius: 0, background: solid ? 'hsl(var(--secondary))' : 'var(--paper)', color: solid ? 'hsl(var(--secondary-foreground))' : 'hsl(var(--secondary))', textTransform: 'uppercase', letterSpacing: '0.16em' }}
           >
             Agenda una charla <CalendarDays size={15} />
           </button>
