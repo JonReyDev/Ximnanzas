@@ -87,7 +87,7 @@ export function Journal({ onContact }: JournalProps) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }} className="journal-top" data-testid="journal-top">
             <div>
      
-            <span className="section-kicker" style={{ color: 'var(--amber)' }}>Ideas Ximanzas</span>
+            <span className="section-kicker" style={{ color: 'var(--amber)' }}>Ideas Ximnanzas</span>
             <span className="section-kicker" style={{ color: 'var(--amber)' }}>BLOG</span>
               <h2 className="display">Pensar bien<br />también es patrimonio.
               </h2>
