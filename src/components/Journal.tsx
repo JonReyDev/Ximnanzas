@@ -84,13 +84,16 @@ export function Journal({ onContact }: JournalProps) {
     <>
       <section id="ideas" className="section" style={{ background: 'var(--paper-warm)' }}>
         <div className="container-wide">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }} className="journal-top">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '20px' }} className="journal-top" data-testid="journal-top">
             <div>
-              <div className="section-kicker">Notas para avanzar</div>
-              <h2 className="display">Ideas que si<br />caben en tu semana.</h2>
+     
+            <span className="section-kicker" style={{ color: 'var(--amber)' }}>Ideas Ximanzas</span>
+            <span className="section-kicker" style={{ color: 'var(--amber)' }}>BLOG</span>
+              <h2 className="display">Pensar bien<br />también es patrimonio.
+              </h2>
             </div>
             <p style={{ fontSize: '0.95rem', color: 'var(--muted)', maxWidth: '320px' }}>
-              Pequeñas lecturas para tomar mejores decisiones cuando tienes un cafe, diez minutos y ganas de ordenar algo.
+            Lecturas breves para conversar sobre retiro, protección, inversión y las decisiones que sostienen una vida.
             </p>
           </div>
 

@@ -152,7 +152,7 @@ export function Hero({ onSchedule }: HeroProps) {
             >
               <button
                 data-testid="hero-cta-Simulador"
-                onClick={() => scrollToSection('#calculadora')}
+                onClick={() => scrollToSection('#simulador')}
                 className="group inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold tracking-wide text-white transition-colors duration-300"
                 style={{ background: 'var(--amber)' }}
               >

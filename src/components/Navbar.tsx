@@ -8,7 +8,7 @@ type NavbarProps = {
 };
 
 const NAV_LINKS = [
-  { label: 'Simulador', href: '#calculadora', testId: 'nav-simulator-link' },
+  { label: 'Simulador', href: '#simulador', testId: 'nav-simulator-link' },
   { label: 'La idea', href: '#beneficios', testId: 'nav-benefits-link' },
   { label: 'Testimonios', href: '#testimonios', testId: 'nav-testimonials-link' },
   { label: 'Ideas', href: '#ideas', testId: 'nav-ideas-link' },
@@ -50,7 +50,6 @@ export function Navbar({ onSchedule, dark = false }: NavbarProps) {
         right: 0,
         zIndex: 50,
         transition: 'all 0.4s ease',
-        borderRadius: '8px',
         background: solid ? 'rgba(244, 242, 237, 0.92)' : 'transparent',
         backdropFilter: solid ? 'blur(16px)' : 'none',
         borderBottom: solid ? '1px solid var(--line)' : '1px solid transparent',
