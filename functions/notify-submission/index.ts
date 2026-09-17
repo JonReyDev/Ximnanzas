@@ -5,7 +5,7 @@ const corsHeaders = {
 };
 const recipient = Deno.env.get('NOTIFICATION_EMAIL') ?? 'ximenalalith.allianzmlp@gmail.com';
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
-const fromEmail = Deno.env.get('RESEND_FROM_EMAIL');
+const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') ?? Deno.env.get('RESEND_FROM_EMAIL') : undefined;
 
 function escapeHtml(value: unknown): string {
   return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
