@@ -116,7 +116,7 @@ export function Hero({ onSchedule }: HeroProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.8 }}
               className="mb-8 block"
-              style={{ fontFamily: 'Barlow Semi Condensed, sans-serif', fontSize: '0.72rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--amber-soft)' }}
+              style={{ fontFamily: 'DM Mono, Menlo, monospace', fontSize: '0.72rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--amber-soft)' }}
               data-testid="hero-overline"
             >
               Plan Personal de Retiro Allianz · Asesoria XIMNANZAS

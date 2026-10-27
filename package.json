@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "api:dev": "npm run dev --prefix api-server",
+    "api:build": "npm run build --prefix api-server",
+    "api:typecheck": "npm run typecheck --prefix api-server",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -14,6 +17,7 @@
     "@supabase/server": "^1.6.0",
     "@supabase/supabase-js": "^2.57.4",
     "@vercel/connect": "^2.2.0",
+    "animejs": "^4.5.0",
     "dotenv": "^17.4.2",
     "eve": "^0.57.0",
     "framer-motion": "^13.1.1",

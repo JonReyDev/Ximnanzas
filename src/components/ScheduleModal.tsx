@@ -1,82 +1,317 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowRight, CircleCheck, X } from 'lucide-react';
+import type { AutoLayout, JSAnimation } from 'animejs';
 import { notifySubmission, supabase, type Appointment, type Lead } from '@/lib/supabase';
+import { SERVICES } from '@/lib/services';
 
 type ContactMode = 'lead' | 'appointment';
-type ScheduleModalProps = { open: boolean; onClose: () => void; presetService?: string };
-type ContactForm = { name: string; email: string; phone: string; message: string; date: string; time: string; service: string };
 
-const initialForm: ContactForm = { name: '', email: '', phone: '', message: '', date: '', time: '', service: 'Diagnóstico financiero' };
-const topics = ['Diagnóstico financiero', 'Retiro e inversión', 'Protección familiar', 'Salud y patrimonio'];
-const times = ['09:00', '11:00', '13:00', '16:00'];
+type ScheduleModalProps = {
+  open: boolean;
+  onClose: () => void;
+  presetService?: string;
+};
+
+type ContactForm = {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  date: string;
+  time: string;
+  topic: string;
+};
+
+const INITIAL_FORM: ContactForm = {
+  name: '',
+  email: '',
+  phone: '',
+  message: '',
+  date: '',
+  time: '',
+  topic: 'Diagnóstico financiero',
+};
+
+const TOPICS = ['Diagnóstico financiero', 'Retiro e inversión', 'Protección familiar', 'Salud y patrimonio'];
+const TIME_SLOTS = ['09:00', '11:00', '13:00', '16:00'];
 
 export function ScheduleModal({ open, onClose, presetService }: ScheduleModalProps) {
   const [mode, setMode] = useState<ContactMode>('appointment');
-  const [form, setForm] = useState<ContactForm>({ ...initialForm, service: presetService || initialForm.service });
+  const [form, setForm] = useState<ContactForm>(INITIAL_FORM);
   const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!open) return;
-    setMode('appointment');
-    setForm({ ...initialForm, service: presetService || initialForm.service });
-    setSubmitted(false);
-    setSubmitting(false);
-    setError('');
-  }, [open, presetService]);
+  const [layoutReady, setLayoutReady] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const layoutRef = useRef<AutoLayout | null>(null);
+  const closeAnimationRef = useRef<JSAnimation | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [open]);
 
-  if (!open) return null;
+  useEffect(() => {
+    let cancelled = false;
+    void import('animejs').then(({ createLayout }) => {
+      const dialog = dialogRef.current;
+      if (!dialog || cancelled) return;
+      dialog.style.setProperty('--overlay-alpha', '0');
+      layoutRef.current = createLayout(dialog, {
+        children: ['.modal', 'h2', 'h3', 'p'],
+        properties: ['--overlay-alpha'],
+      });
+      setLayoutReady(true);
+    });
 
-  const isAppointment = mode === 'appointment';
-  const setField = (key: keyof ContactForm, value: string) => setForm((current) => ({ ...current, [key]: value }));
+    return () => {
+      cancelled = true;
+      layoutRef.current?.revert();
+      layoutRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const layout = layoutRef.current;
+    if (!dialog || !layout || !layoutReady) return;
+
+    if (open && !dialog.open) {
+      closeAnimationRef.current?.revert();
+      closeAnimationRef.current = null;
+      const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 420;
+      layout.update(() => {
+        dialog.showModal();
+        dialog.style.setProperty('--overlay-alpha', '0.58');
+      }, {
+        duration,
+        ease: 'out(3)',
+        enterFrom: { opacity: 0, scale: 0.96, y: 18 },
+      });
+    } else if (!open && dialog.open) {
+      let cancelled = false;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration = reducedMotion ? 0 : 240;
+      layout.update(() => {
+        dialog.style.setProperty('--overlay-alpha', '0');
+      }, {
+        duration,
+        ease: 'in(2)',
+      });
+      void import('animejs').then(({ animate }) => {
+        if (cancelled) return;
+        const panel = dialog.querySelector<HTMLElement>('.modal');
+        if (!panel) {
+          dialog.close();
+          return;
+        }
+        closeAnimationRef.current = animate(panel, {
+          opacity: 0,
+          scale: 0.98,
+          translateY: 10,
+          duration,
+          ease: 'in(2)',
+        });
+        void closeAnimationRef.current.then(() => {
+          if (!cancelled) {
+            closeAnimationRef.current?.revert();
+            closeAnimationRef.current = null;
+            dialog.close();
+          }
+        });
+      });
+
+      return () => {
+        cancelled = true;
+        closeAnimationRef.current?.revert();
+        closeAnimationRef.current = null;
+      };
+    }
+  }, [open, layoutReady]);
+
+  useEffect(() => {
+    if (open) {
+      setMode('appointment');
+      setForm({ ...INITIAL_FORM, topic: presetService || INITIAL_FORM.topic });
+      setSubmitted(false);
+      setPending(false);
+      setError('');
+    }
+  }, [open, presetService]);
+
+  const setField = (key: keyof ContactForm, value: string) => {
+    setForm((current) => ({ ...current, [key]: value }));
+    setError('');
+  };
+
+  const changeMode = (nextMode: ContactMode) => {
+    setMode(nextMode);
+    setError('');
+  };
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError('');
-    setSubmitting(true);
-    const payload: Lead | Appointment = isAppointment
-      ? { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), date: form.date, time: form.time, service: form.service, status: 'pending' }
-      : { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), message: form.message.trim() };
-    const { error: insertError } = await supabase.from(isAppointment ? 'appointments' : 'leads').insert([payload]);
-    if (insertError) {
-      setSubmitting(false);
-      setError('No pudimos enviar tus datos. Intenta de nuevo o llámanos directamente.');
+    if (!form.name.trim() || !form.email.trim() || form.phone.trim().length < 7) {
+      setError('Completa tu nombre, correo y un teléfono válido.');
       return;
     }
-    await notifySubmission(isAppointment ? 'appointment' : 'lead', payload);
-    setSubmitting(false);
-    setSubmitted(true);
+    if (mode === 'appointment' && (!form.date || !form.time)) {
+      setError('Elige una fecha y hora para la conversación.');
+      return;
+    }
+
+    setPending(true);
+    setError('');
+
+    if (mode === 'appointment') {
+      const appointment: Omit<Appointment, 'id'> = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        date: form.date,
+        time: form.time,
+        service: form.topic,
+        status: 'pending',
+      };
+      const { error: requestError } = await supabase.from('appointments').insert([appointment]);
+      if (!requestError) {
+        await notifySubmission('appointment', appointment);
+        setSubmitted(true);
+      } else {
+        setError('No pudimos enviar tus datos. Intenta de nuevo o llámanos directamente.');
+      }
+    } else {
+      const lead: Omit<Lead, 'id'> = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        message: form.message.trim(),
+      };
+      const { error: requestError } = await supabase.from('leads').insert([lead]);
+      if (!requestError) {
+        await notifySubmission('lead', lead);
+        setSubmitted(true);
+      } else {
+        setError('No pudimos enviar tus datos. Intenta de nuevo o llámanos directamente.');
+      }
+    }
+    setPending(false);
   };
 
   return (
-    <div className="contact-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div className="contact-modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
-        <button className="contact-modal-close" onClick={onClose} aria-label="Cerrar"><X size={28} /></button>
+    <dialog
+      ref={dialogRef}
+      className="modal-backdrop"
+      aria-labelledby="contact-title"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="modal">
+        <button className="modal-close" onClick={onClose} aria-label="Cerrar" data-testid="button-close-contact">
+          <X size={21} />
+        </button>
         {submitted ? (
-          <div className="contact-success"><CircleCheck size={34} /><h2>{isAppointment ? 'Tu cita está en camino.' : 'Ya estamos en contacto.'}</h2><p>{isAppointment ? 'Te confirmaremos el horario por teléfono o correo. Gracias por dar este primer paso.' : 'Una persona de nuestro equipo revisará tus datos y te contactará muy pronto.'}</p><button className="contact-submit" onClick={onClose}>Listo <ArrowRight size={18} /></button></div>
+          <div className="success-box" data-testid="status-contact-success">
+            <CircleCheck size={28} />
+            <h3>{mode === 'appointment' ? 'Tu cita está en camino.' : 'Ya estamos en contacto.'}</h3>
+            <p>
+              {mode === 'appointment'
+                ? 'Te confirmaremos el horario por teléfono o correo. Gracias por dar este primer paso.'
+                : 'Una persona de nuestro equipo revisará tus datos y te contactará muy pronto.'}
+            </p>
+            <button className="button button-dark" onClick={onClose} style={{ marginTop: 22 }} data-testid="button-success-close">
+              Listo
+            </button>
+          </div>
         ) : (
           <>
-            <div className="contact-switch" role="tablist" aria-label="Tipo de contacto">
-              <button className={mode === 'lead' ? 'selected' : ''} onClick={() => { setMode('lead'); setError(''); }} role="tab" aria-selected={mode === 'lead'}>Quiero orientación</button>
-              <button className={mode === 'appointment' ? 'selected' : ''} onClick={() => { setMode('appointment'); setError(''); }} role="tab" aria-selected={mode === 'appointment'}>Agendar cita</button>
+            <div className="form-switch" role="tablist" aria-label="Tipo de contacto">
+              <button
+                className={mode === 'lead' ? 'selected' : ''}
+                onClick={() => changeMode('lead')}
+                role="tab"
+                aria-selected={mode === 'lead'}
+                data-testid="button-mode-diagnostico"
+              >
+                Quiero orientación
+              </button>
+              <button
+                className={mode === 'appointment' ? 'selected' : ''}
+                onClick={() => changeMode('appointment')}
+                role="tab"
+                aria-selected={mode === 'appointment'}
+                data-testid="button-mode-appointment"
+              >
+                Agendar cita
+              </button>
             </div>
-            <h2 id="contact-title">{isAppointment ? 'Hagamos espacio para tu futuro.' : 'Empecemos por tu contexto.'}</h2>
-            <p className="contact-intro">{isAppointment ? 'Elige un momento y conversemos sin tecnicismos. Una primera charla de 30 minutos puede cambiar la dirección.' : 'Cuéntanos qué te importa proteger. Te responderemos con claridad, no con presión.'}</p>
-            <form className="contact-form" onSubmit={submit}>
-              <label>Nombre completo<input value={form.name} onChange={(event) => setField('name', event.target.value)} placeholder="¿Cómo te llamamos?" required /></label>
-              <div className="contact-form-split"><label>Correo<input type="email" value={form.email} onChange={(event) => setField('email', event.target.value)} placeholder="tu@correo.com" required /></label><label>Teléfono<input type="tel" minLength={7} value={form.phone} onChange={(event) => setField('phone', event.target.value)} placeholder="55 0000 0000" required /></label></div>
-              {isAppointment ? <><div className="contact-form-split"><label>Fecha preferida<input type="date" min={new Date().toISOString().split('T')[0]} value={form.date} onChange={(event) => setField('date', event.target.value)} required /></label><label>Hora<select value={form.time} onChange={(event) => setField('time', event.target.value)} required><option value="">Elige una hora</option>{times.map((time) => <option key={time} value={time}>{time}</option>)}</select></label></div><label>Tema para la charla<select value={form.service} onChange={(event) => setField('service', event.target.value)}>{topics.map((topic) => <option key={topic}>{topic}</option>)}</select></label></> : <label>¿Qué te gustaría ordenar?<textarea value={form.message} onChange={(event) => setField('message', event.target.value)} placeholder="Retiro, protección, inversión…" /></label>}
-              {error && <div className="contact-form-error" role="alert">{error}</div>}
-              <button className="contact-submit" type="submit" disabled={submitting}>{submitting ? 'Enviando...' : isAppointment ? 'Reservar conversación' : 'Quiero que me contacten'} <ArrowRight size={18} /></button>
+            <h2 id="contact-title">{mode === 'appointment' ? 'Hagamos espacio para tu futuro.' : 'Empecemos por tu contexto.'}</h2>
+            <p>
+              {mode === 'appointment'
+                ? 'Elige un momento y conversemos sin tecnicismos. Una primera charla puede cambiar la dirección.'
+                : 'Cuéntanos qué te importa proteger. Te responderemos con claridad, no con presión.'}
+            </p>
+            <form className="modal-form" onSubmit={submit}>
+              <div className="form-field">
+                <label htmlFor="contact-name">Nombre completo</label>
+                <input id="contact-name" value={form.name} onChange={(event) => setField('name', event.target.value)} placeholder="¿Cómo te llamamos?" required data-testid="input-contact-name" />
+              </div>
+              <div className="form-split">
+                <div className="form-field">
+                  <label htmlFor="contact-email">Correo</label>
+                  <input id="contact-email" type="email" value={form.email} onChange={(event) => setField('email', event.target.value)} placeholder="tu@correo.com" required data-testid="input-contact-email" />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="contact-phone">Teléfono</label>
+                  <input id="contact-phone" type="tel" value={form.phone} onChange={(event) => setField('phone', event.target.value)} placeholder="55 0000 0000" required data-testid="input-contact-phone" />
+                </div>
+              </div>
+              {mode === 'appointment' ? (
+                <>
+                  <div className="form-split">
+                    <div className="form-field">
+                      <label htmlFor="contact-date">Fecha preferida</label>
+                      <input id="contact-date" type="date" min={new Date().toISOString().split('T')[0]} value={form.date} onChange={(event) => setField('date', event.target.value)} required data-testid="input-contact-date" />
+                    </div>
+                    <div className="form-field">
+                      <label htmlFor="contact-time">Hora</label>
+                      <select id="contact-time" value={form.time} onChange={(event) => setField('time', event.target.value)} required data-testid="select-contact-time">
+                        <option value="">Elige una hora</option>
+                        {TIME_SLOTS.map((time) => <option key={time} value={time}>{time}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="contact-topic">Tema para la charla</label>
+                    <select id="contact-topic" value={form.topic} onChange={(event) => setField('topic', event.target.value)} data-testid="select-contact-topic">
+                      {presetService && !TOPICS.includes(presetService) && <option value={presetService}>{presetService}</option>}
+                      {TOPICS.map((topic) => <option key={topic}>{topic}</option>)}
+                      {SERVICES.filter((service) => !TOPICS.includes(service.title)).map((service) => <option key={service.slug} value={service.title}>{service.title}</option>)}
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <div className="form-field">
+                  <label htmlFor="contact-message">¿Qué te gustaría ordenar?</label>
+                  <textarea id="contact-message" value={form.message} onChange={(event) => setField('message', event.target.value)} placeholder="Retiro, protección, inversión…" data-testid="input-contact-message" />
+                </div>
+              )}
+              {error && <div className="form-error" role="alert" data-testid="status-contact-error">{error}</div>}
+              <button className="button button-primary" type="submit" disabled={pending} data-testid="button-submit-contact">
+                {pending ? 'Enviando…' : mode === 'appointment' ? 'Reservar conversación' : 'Quiero que me contacten'}
+                <ArrowRight size={15} />
+              </button>
             </form>
           </>
         )}
       </div>
-    </div>
+    </dialog>
   );
 }
