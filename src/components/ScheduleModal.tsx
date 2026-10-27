@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowRight, CircleCheck, X } from 'lucide-react';
+import type { AutoLayout, JSAnimation } from 'animejs';
 import { notifySubmission, supabase, type Appointment, type Lead } from '@/lib/supabase';
 import { SERVICES } from '@/lib/services';
 
@@ -40,6 +41,10 @@ export function ScheduleModal({ open, onClose, presetService }: ScheduleModalPro
   const [submitted, setSubmitted] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
+  const [layoutReady, setLayoutReady] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const layoutRef = useRef<AutoLayout | null>(null);
+  const closeAnimationRef = useRef<JSAnimation | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
@@ -47,6 +52,84 @@ export function ScheduleModal({ open, onClose, presetService }: ScheduleModalPro
       document.body.style.overflow = '';
     };
   }, [open]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void import('animejs').then(({ createLayout }) => {
+      const dialog = dialogRef.current;
+      if (!dialog || cancelled) return;
+      dialog.style.setProperty('--overlay-alpha', '0');
+      layoutRef.current = createLayout(dialog, {
+        children: ['.modal', 'h2', 'h3', 'p'],
+        properties: ['--overlay-alpha'],
+      });
+      setLayoutReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+      layoutRef.current?.revert();
+      layoutRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const layout = layoutRef.current;
+    if (!dialog || !layout || !layoutReady) return;
+
+    if (open && !dialog.open) {
+      closeAnimationRef.current?.revert();
+      closeAnimationRef.current = null;
+      const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 420;
+      layout.update(() => {
+        dialog.showModal();
+        dialog.style.setProperty('--overlay-alpha', '0.58');
+      }, {
+        duration,
+        ease: 'out(3)',
+        enterFrom: { opacity: 0, scale: 0.96, y: 18 },
+      });
+    } else if (!open && dialog.open) {
+      let cancelled = false;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration = reducedMotion ? 0 : 240;
+      layout.update(() => {
+        dialog.style.setProperty('--overlay-alpha', '0');
+      }, {
+        duration,
+        ease: 'in(2)',
+      });
+      void import('animejs').then(({ animate }) => {
+        if (cancelled) return;
+        const panel = dialog.querySelector<HTMLElement>('.modal');
+        if (!panel) {
+          dialog.close();
+          return;
+        }
+        closeAnimationRef.current = animate(panel, {
+          opacity: 0,
+          scale: 0.98,
+          translateY: 10,
+          duration,
+          ease: 'in(2)',
+        });
+        void closeAnimationRef.current.then(() => {
+          if (!cancelled) {
+            closeAnimationRef.current?.revert();
+            closeAnimationRef.current = null;
+            dialog.close();
+          }
+        });
+      });
+
+      return () => {
+        cancelled = true;
+        closeAnimationRef.current?.revert();
+        closeAnimationRef.current = null;
+      };
+    }
+  }, [open, layoutReady]);
 
   useEffect(() => {
     if (open) {
@@ -57,8 +140,6 @@ export function ScheduleModal({ open, onClose, presetService }: ScheduleModalPro
       setError('');
     }
   }, [open, presetService]);
-
-  if (!open) return null;
 
   const setField = (key: keyof ContactForm, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -120,14 +201,19 @@ export function ScheduleModal({ open, onClose, presetService }: ScheduleModalPro
   };
 
   return (
-    <div
+    <dialog
+      ref={dialogRef}
       className="modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
+      aria-labelledby="contact-title"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <div className="modal">
         <button className="modal-close" onClick={onClose} aria-label="Cerrar" data-testid="button-close-contact">
           <X size={21} />
         </button>
@@ -226,6 +312,6 @@ export function ScheduleModal({ open, onClose, presetService }: ScheduleModalPro
           </>
         )}
       </div>
-    </div>
+    </dialog>
   );
 }

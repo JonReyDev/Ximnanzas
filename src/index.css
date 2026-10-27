@@ -701,10 +701,23 @@
     position: fixed;
     inset: 0;
     z-index: 100;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 20px;
+    overflow-y: auto;
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+  .modal-backdrop[open] {
     display: grid;
     place-items: center;
-    padding: 20px;
-    background: rgba(19, 16, 29, 0.58);
+  }
+  .modal-backdrop::backdrop {
+    background: rgba(19, 16, 29, var(--overlay-alpha, 0.58));
     backdrop-filter: blur(8px);
   }
   .modal {
@@ -717,7 +730,6 @@
     border-radius: 24px;
     background: hsl(var(--background));
     box-shadow: 0 32px 90px rgba(19, 16, 29, 0.28);
-    animation: modalEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   .modal-close {
     position: absolute;
@@ -798,10 +810,6 @@
   .success-box p { color: var(--muted); font-size: 0.92rem; }
   .button-dark { background: var(--ink); color: var(--paper); }
   .button-dark:hover { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
-  @keyframes modalEnter {
-    from { opacity: 0; transform: translateY(18px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
   @media (max-width: 768px) {
     .prospectos-header, .prospectos-section-heading { align-items: flex-start; flex-direction: column; }
     .prospectos-section-heading h2 { margin-bottom: 0; }
