@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Download, Sparkles, ArrowRight } from 'lucide-react';
 import {
   RISK_PROFILES,
@@ -26,6 +26,9 @@ export function Simulador({ onContact }: SimuladorProps) {
   const finalBalance = projection.length > 0 ? projection[projection.length - 1].balance : 0;
   const totalContributed = projection.length > 0 ? projection[projection.length - 1].totalContributed : 0;
   const totalInterest = finalBalance - totalContributed;
+  const balanceRef = useRef<HTMLElement | null>(null);
+  const currentBalanceRef = useRef(0);
+  const chartLineRef = useRef<SVGPathElement | null>(null);
 
   // Chart
   const chartW = 600;
@@ -48,6 +51,77 @@ export function Simulador({ onContact }: SimuladorProps) {
 
   const linePath = `M ${points[0]?.x ?? 0} ${points[0]?.y ?? 0} ` +
     points.map((p) => `L ${p.x} ${p.y}`).join(' ');
+
+  useEffect(() => {
+    let cancelled = false;
+    let stopAnimation = () => {};
+    const element = balanceRef.current;
+    if (!element) return undefined;
+
+    const formatBalance = (value: number) => `$${Math.round(value).toLocaleString('es-MX')}`;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      element.textContent = formatBalance(finalBalance);
+      currentBalanceRef.current = finalBalance;
+      return undefined;
+    }
+
+    const animatedValue = { value: currentBalanceRef.current };
+    element.textContent = formatBalance(animatedValue.value);
+
+    void import('animejs').then(({ animate }) => {
+      if (cancelled) return;
+      const animation = animate(animatedValue, {
+        value: finalBalance,
+        duration: 700,
+        ease: 'out(3)',
+        onUpdate: () => {
+          currentBalanceRef.current = animatedValue.value;
+          element.textContent = formatBalance(animatedValue.value);
+        },
+      });
+      stopAnimation = () => {
+        animation.revert();
+      };
+    });
+
+    return () => {
+      cancelled = true;
+      stopAnimation();
+    };
+  }, [finalBalance]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let stopAnimation = () => {};
+    const path = chartLineRef.current;
+    if (!path) return undefined;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      path.removeAttribute('pathLength');
+      path.removeAttribute('stroke-dasharray');
+      path.removeAttribute('stroke-dashoffset');
+      return undefined;
+    }
+
+    void import('animejs').then(({ animate, svg }) => {
+      if (cancelled) return;
+      const [drawable] = svg.createDrawable(path);
+      drawable.setAttribute('draw', '0 0');
+      const animation = animate(drawable, {
+        draw: '0 1',
+        duration: 700,
+        ease: 'out(3)',
+      });
+      stopAnimation = () => {
+        animation.revert();
+      };
+    });
+
+    return () => {
+      cancelled = true;
+      stopAnimation();
+    };
+  }, [linePath]);
 
   return (
     <section id="simulador" className="section" style={{ background: 'var(--paper-warm)' }}>
@@ -104,7 +178,7 @@ export function Simulador({ onContact }: SimuladorProps) {
 
           <div className="calc-result">
             <small>Si apartaras cada mes</small>
-            <strong>${finalBalance.toLocaleString('es-MX')}</strong>
+            <strong ref={balanceRef}>$0</strong>
             <span>podria ser una referencia para tu fondo en {years} años*</span>
           </div>
 
@@ -124,7 +198,7 @@ export function Simulador({ onContact }: SimuladorProps) {
                 <line key={t} x1={padX} y1={padY + t * chartHInner} x2={padX + chartWInner} y2={padY + t * chartHInner} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
               ))}
               <path d={areaPath} fill="url(#areaGrad)" />
-              <path d={linePath} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path ref={chartLineRef} d={linePath} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               {points.filter((_, i) => i % Math.ceil(projection.length / 5) === 0 || i === points.length - 1).map((p) => (
                 <text key={p.year} x={p.x} y={chartH - 2} textAnchor="middle" fill="rgba(255,255,255,0.3)" style={{ fontSize: '9px' }}>
                   Año {p.year}
