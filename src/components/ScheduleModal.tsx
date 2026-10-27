@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowRight, CircleCheck, X } from 'lucide-react';
-import type { AutoLayout, JSAnimation } from 'animejs';
-import { notifySubmission, supabase, type Appointment, type Lead } from '@/lib/supabase';
+import { useEffect, useState, type FormEvent } from 'react';
+import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock, X } from 'lucide-react';
+import { notifySubmission, supabase, type Appointment } from '@/lib/supabase';
 import { SERVICES } from '@/lib/services';
 
 type ContactMode = 'lead' | 'appointment';
@@ -12,39 +11,41 @@ type ScheduleModalProps = {
   presetService?: string;
 };
 
-type ContactForm = {
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  date: string;
-  time: string;
-  topic: string;
+const TIME_SLOTS = ['10:00', '11:00', '12:00', '13:00', '16:00', '17:00', '18:00'];
+const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const WEEKDAYS = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+
+const dateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
-const INITIAL_FORM: ContactForm = {
-  name: '',
-  email: '',
-  phone: '',
-  message: '',
-  date: '',
-  time: '',
-  topic: 'Diagnóstico financiero',
-};
-
-const TOPICS = ['Diagnóstico financiero', 'Retiro e inversión', 'Protección familiar', 'Salud y patrimonio'];
-const TIME_SLOTS = ['09:00', '11:00', '13:00', '16:00'];
+const isSameDay = (first: Date | null, second: Date) =>
+  Boolean(first) &&
+  first!.getFullYear() === second.getFullYear() &&
+  first!.getMonth() === second.getMonth() &&
+  first!.getDate() === second.getDate();
 
 export function ScheduleModal({ open, onClose, presetService }: ScheduleModalProps) {
-  const [mode, setMode] = useState<ContactMode>('appointment');
-  const [form, setForm] = useState<ContactForm>(INITIAL_FORM);
+  const [date, setDate] = useState<Date | null>(null);
+  const [time, setTime] = useState('');
+  const [viewMonth, setViewMonth] = useState(new Date());
+  const [form, setForm] = useState({ name: '', email: '', phone: '', service: presetService || '' });
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
-  const [layoutReady, setLayoutReady] = useState(false);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const layoutRef = useRef<AutoLayout | null>(null);
-  const closeAnimationRef = useRef<JSAnimation | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setDate(null);
+    setTime('');
+    setViewMonth(new Date());
+    setForm({ name: '', email: '', phone: '', service: presetService || '' });
+    setSubmitted(false);
+    setError('');
+  }, [open, presetService]);
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
@@ -66,250 +67,96 @@ export function ScheduleModal({ open, onClose, presetService }: ScheduleModalPro
       setLayoutReady(true);
     });
 
-    return () => {
-      cancelled = true;
-      layoutRef.current?.revert();
-      layoutRef.current = null;
-    };
-  }, []);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const firstDay = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
+  const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate();
+  const offset = (firstDay.getDay() + 6) % 7;
+  const days = [...Array(offset).fill(null), ...Array.from({ length: daysInMonth }, (_, index) => new Date(viewMonth.getFullYear(), viewMonth.getMonth(), index + 1))];
+  const canSubmit = Boolean(date && time && form.name.trim() && form.email.trim() && form.phone.trim());
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    const layout = layoutRef.current;
-    if (!dialog || !layout || !layoutReady) return;
+  const updateForm = (field: keyof typeof form, value: string) => setForm((current) => ({ ...current, [field]: value }));
 
-    if (open && !dialog.open) {
-      closeAnimationRef.current?.revert();
-      closeAnimationRef.current = null;
-      const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 420;
-      layout.update(() => {
-        dialog.showModal();
-        dialog.style.setProperty('--overlay-alpha', '0.58');
-      }, {
-        duration,
-        ease: 'out(3)',
-        enterFrom: { opacity: 0, scale: 0.96, y: 18 },
-      });
-    } else if (!open && dialog.open) {
-      let cancelled = false;
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const duration = reducedMotion ? 0 : 240;
-      layout.update(() => {
-        dialog.style.setProperty('--overlay-alpha', '0');
-      }, {
-        duration,
-        ease: 'in(2)',
-      });
-      void import('animejs').then(({ animate }) => {
-        if (cancelled) return;
-        const panel = dialog.querySelector<HTMLElement>('.modal');
-        if (!panel) {
-          dialog.close();
-          return;
-        }
-        closeAnimationRef.current = animate(panel, {
-          opacity: 0,
-          scale: 0.98,
-          translateY: 10,
-          duration,
-          ease: 'in(2)',
-        });
-        void closeAnimationRef.current.then(() => {
-          if (!cancelled) {
-            closeAnimationRef.current?.revert();
-            closeAnimationRef.current = null;
-            dialog.close();
-          }
-        });
-      });
-
-      return () => {
-        cancelled = true;
-        closeAnimationRef.current?.revert();
-        closeAnimationRef.current = null;
-      };
-    }
-  }, [open, layoutReady]);
-
-  useEffect(() => {
-    if (open) {
-      setMode('appointment');
-      setForm({ ...INITIAL_FORM, topic: presetService || INITIAL_FORM.topic });
-      setSubmitted(false);
-      setPending(false);
-      setError('');
-    }
-  }, [open, presetService]);
-
-  const setField = (key: keyof ContactForm, value: string) => {
-    setForm((current) => ({ ...current, [key]: value }));
-    setError('');
-  };
-
-  const changeMode = (nextMode: ContactMode) => {
-    setMode(nextMode);
-    setError('');
-  };
-
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || form.phone.trim().length < 7) {
-      setError('Completa tu nombre, correo y un teléfono válido.');
+    if (!canSubmit || !date) {
+      setError('Completa tus datos, la fecha y el horario.');
       return;
     }
-    if (mode === 'appointment' && (!form.date || !form.time)) {
-      setError('Elige una fecha y hora para la conversación.');
-      return;
-    }
-
-    setPending(true);
+    setSubmitting(true);
     setError('');
-
-    if (mode === 'appointment') {
-      const appointment: Omit<Appointment, 'id'> = {
-        name: form.name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim(),
-        date: form.date,
-        time: form.time,
-        service: form.topic,
-        status: 'pending',
-      };
-      const { error: requestError } = await supabase.from('appointments').insert([appointment]);
-      if (!requestError) {
-        await notifySubmission('appointment', appointment);
-        setSubmitted(true);
-      } else {
-        setError('No pudimos enviar tus datos. Intenta de nuevo o llámanos directamente.');
-      }
-    } else {
-      const lead: Omit<Lead, 'id'> = {
-        name: form.name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim(),
-        message: form.message.trim(),
-      };
-      const { error: requestError } = await supabase.from('leads').insert([lead]);
-      if (!requestError) {
-        await notifySubmission('lead', lead);
-        setSubmitted(true);
-      } else {
-        setError('No pudimos enviar tus datos. Intenta de nuevo o llámanos directamente.');
-      }
+    const appointment: Omit<Appointment, 'id'> = {
+      ...form,
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      date: dateKey(date),
+      time,
+      service: form.service || undefined,
+      status: 'pending',
+    };
+    const { error: databaseError } = await supabase.from('appointments').insert([appointment]);
+    if (databaseError) {
+      setError('No pudimos agendar tu cita. Intenta de nuevo.');
+      setSubmitting(false);
+      return;
     }
-    setPending(false);
+    await notifySubmission('appointment', appointment);
+    setSubmitting(false);
+    setSubmitted(true);
   };
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="modal-backdrop"
-      aria-labelledby="contact-title"
-      onCancel={(event) => {
-        event.preventDefault();
-        onClose();
-      }}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <div className="modal">
-        <button className="modal-close" onClick={onClose} aria-label="Cerrar" data-testid="button-close-contact">
-          <X size={21} />
-        </button>
+    <div role="dialog" aria-modal="true" aria-labelledby="schedule-title" style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+      <div aria-hidden="true" onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} />
+      <div className="fade-up" style={{ position: 'relative', width: '100%', maxWidth: '720px', maxHeight: '90vh', overflowY: 'auto', background: 'var(--paper)', borderRadius: '20px', boxShadow: '0 32px 80px rgba(0,0,0,0.3)' }}>
+        <div style={{ padding: '24px 28px 16px', borderBottom: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px' }}>
+            <div>
+              <h2 id="schedule-title" className="serif" style={{ fontSize: '1.5rem', fontWeight: 500 }}>Agenda una cita</h2>
+              <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Elige día y horario. Un asesor certificado te contactará para confirmar.</p>
+            </div>
+            <button type="button" aria-label="Cerrar" onClick={onClose} style={{ alignSelf: 'flex-start', background: 'none', border: 0, cursor: 'pointer', color: 'var(--muted)' }}><X size={20} /></button>
+          </div>
+        </div>
+
         {submitted ? (
-          <div className="success-box" data-testid="status-contact-success">
-            <CircleCheck size={28} />
-            <h3>{mode === 'appointment' ? 'Tu cita está en camino.' : 'Ya estamos en contacto.'}</h3>
-            <p>
-              {mode === 'appointment'
-                ? 'Te confirmaremos el horario por teléfono o correo. Gracias por dar este primer paso.'
-                : 'Una persona de nuestro equipo revisará tus datos y te contactará muy pronto.'}
-            </p>
-            <button className="button button-dark" onClick={onClose} style={{ marginTop: 22 }} data-testid="button-success-close">
-              Listo
-            </button>
+          <div style={{ padding: '56px 28px', textAlign: 'center' }}>
+            <CheckCircle2 size={56} style={{ color: '#16a34a', margin: '0 auto 16px' }} />
+            <h3 className="serif" style={{ fontSize: '1.5rem', marginBottom: '8px' }}>¡Cita agendada!</h3>
+            <p style={{ color: 'var(--muted)', marginBottom: '24px' }}>Te contactaremos para confirmar tu cita.</p>
+            <button type="button" className="button button-primary" onClick={onClose}>Listo</button>
           </div>
         ) : (
-          <>
-            <div className="form-switch" role="tablist" aria-label="Tipo de contacto">
-              <button
-                className={mode === 'lead' ? 'selected' : ''}
-                onClick={() => changeMode('lead')}
-                role="tab"
-                aria-selected={mode === 'lead'}
-                data-testid="button-mode-diagnostico"
-              >
-                Quiero orientación
-              </button>
-              <button
-                className={mode === 'appointment' ? 'selected' : ''}
-                onClick={() => changeMode('appointment')}
-                role="tab"
-                aria-selected={mode === 'appointment'}
-                data-testid="button-mode-appointment"
-              >
-                Agendar cita
-              </button>
+          <form className="schedule-form" onSubmit={submit} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '28px', padding: '28px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <button type="button" aria-label="Mes anterior" onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1))} className="button button-ghost" style={{ padding: '8px' }}><ChevronLeft size={16} /></button>
+                <strong>{MONTHS[viewMonth.getMonth()]} {viewMonth.getFullYear()}</strong>
+                <button type="button" aria-label="Mes siguiente" onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1))} className="button button-ghost" style={{ padding: '8px' }}><ChevronRight size={16} /></button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center' }}>
+                {WEEKDAYS.map((weekday) => <span key={weekday} className="mono" style={{ color: 'var(--muted)', padding: '4px 0' }}>{weekday}</span>)}
+                {days.map((day, index) => day ? (
+                  <button
+                    key={dateKey(day)}
+                    type="button"
+                    disabled={day < today || day.getDay() === 0}
+                    onClick={() => { setDate(day); setTime(''); }}
+                    style={{ aspectRatio: '1', borderRadius: '8px', border: isSameDay(date, day) ? 0 : '1px solid var(--line-soft)', background: isSameDay(date, day) ? 'var(--ink)' : 'transparent', color: isSameDay(date, day) ? 'var(--paper)' : day < today || day.getDay() === 0 ? '#b8c0c2' : 'var(--ink-soft)', cursor: day < today || day.getDay() === 0 ? 'not-allowed' : 'pointer' }}
+                  >{day.getDate()}</button>
+                ) : <span key={`empty-${index}`} />)}
+              </div>
+              {date && <div style={{ marginTop: '24px' }}><p style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', fontSize: '0.85rem', fontWeight: 500 }}><Clock size={15} /> Horarios disponibles</p><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>{TIME_SLOTS.map((slot) => <button key={slot} type="button" onClick={() => setTime(slot)} style={{ padding: '10px 4px', borderRadius: '8px', border: time === slot ? 0 : '1px solid var(--line)', background: time === slot ? 'var(--ink)' : 'white', color: time === slot ? 'var(--paper)' : 'var(--ink-soft)', cursor: 'pointer' }}>{slot}</button>)}</div></div>}
             </div>
-            <h2 id="contact-title">{mode === 'appointment' ? 'Hagamos espacio para tu futuro.' : 'Empecemos por tu contexto.'}</h2>
-            <p>
-              {mode === 'appointment'
-                ? 'Elige un momento y conversemos sin tecnicismos. Una primera charla puede cambiar la dirección.'
-                : 'Cuéntanos qué te importa proteger. Te responderemos con claridad, no con presión.'}
-            </p>
-            <form className="modal-form" onSubmit={submit}>
-              <div className="form-field">
-                <label htmlFor="contact-name">Nombre completo</label>
-                <input id="contact-name" value={form.name} onChange={(event) => setField('name', event.target.value)} placeholder="¿Cómo te llamamos?" required data-testid="input-contact-name" />
-              </div>
-              <div className="form-split">
-                <div className="form-field">
-                  <label htmlFor="contact-email">Correo</label>
-                  <input id="contact-email" type="email" value={form.email} onChange={(event) => setField('email', event.target.value)} placeholder="tu@correo.com" required data-testid="input-contact-email" />
-                </div>
-                <div className="form-field">
-                  <label htmlFor="contact-phone">Teléfono</label>
-                  <input id="contact-phone" type="tel" value={form.phone} onChange={(event) => setField('phone', event.target.value)} placeholder="55 0000 0000" required data-testid="input-contact-phone" />
-                </div>
-              </div>
-              {mode === 'appointment' ? (
-                <>
-                  <div className="form-split">
-                    <div className="form-field">
-                      <label htmlFor="contact-date">Fecha preferida</label>
-                      <input id="contact-date" type="date" min={new Date().toISOString().split('T')[0]} value={form.date} onChange={(event) => setField('date', event.target.value)} required data-testid="input-contact-date" />
-                    </div>
-                    <div className="form-field">
-                      <label htmlFor="contact-time">Hora</label>
-                      <select id="contact-time" value={form.time} onChange={(event) => setField('time', event.target.value)} required data-testid="select-contact-time">
-                        <option value="">Elige una hora</option>
-                        {TIME_SLOTS.map((time) => <option key={time} value={time}>{time}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-field">
-                    <label htmlFor="contact-topic">Tema para la charla</label>
-                    <select id="contact-topic" value={form.topic} onChange={(event) => setField('topic', event.target.value)} data-testid="select-contact-topic">
-                      {presetService && !TOPICS.includes(presetService) && <option value={presetService}>{presetService}</option>}
-                      {TOPICS.map((topic) => <option key={topic}>{topic}</option>)}
-                      {SERVICES.filter((service) => !TOPICS.includes(service.title)).map((service) => <option key={service.slug} value={service.title}>{service.title}</option>)}
-                    </select>
-                  </div>
-                </>
-              ) : (
-                <div className="form-field">
-                  <label htmlFor="contact-message">¿Qué te gustaría ordenar?</label>
-                  <textarea id="contact-message" value={form.message} onChange={(event) => setField('message', event.target.value)} placeholder="Retiro, protección, inversión…" data-testid="input-contact-message" />
-                </div>
-              )}
-              {error && <div className="form-error" role="alert" data-testid="status-contact-error">{error}</div>}
-              <button className="button button-primary" type="submit" disabled={pending} data-testid="button-submit-contact">
-                {pending ? 'Enviando…' : mode === 'appointment' ? 'Reservar conversación' : 'Quiero que me contacten'}
-                <ArrowRight size={15} />
-              </button>
-            </form>
-          </>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {(['name', 'email', 'phone'] as const).map((field) => <label key={field} style={{ display: 'grid', gap: '6px', fontSize: '0.82rem', fontWeight: 500 }}>{field === 'name' ? 'Nombre completo' : field === 'email' ? 'Correo electrónico' : 'Teléfono'}<input className="input" required type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'} placeholder={field === 'name' ? 'Tu nombre' : field === 'email' ? 'tucorreo@ejemplo.com' : '55 1234 5678'} value={form[field]} onChange={(event) => updateForm(field, event.target.value)} /></label>)}
+              <label style={{ display: 'grid', gap: '6px', fontSize: '0.82rem', fontWeight: 500 }}>Servicio de interés<select className="input" value={form.service} onChange={(event) => updateForm('service', event.target.value)}><option value="">Selecciona un servicio</option>{SERVICES.map((service) => <option key={service.slug} value={service.title}>{service.title}</option>)}</select></label>
+              {date && <p style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem' }}><CalendarDays size={16} /> {date.getDate()} de {MONTHS[date.getMonth()]} {time && `· ${time} hrs`}</p>}
+              {error && <p style={{ color: 'var(--destructive)', fontSize: '0.85rem' }}>{error}</p>}
+              <button type="submit" disabled={!canSubmit || submitting} className="button button-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 'auto', opacity: !canSubmit || submitting ? 0.5 : 1 }}>{submitting ? 'Confirmando...' : 'Confirmar cita'}</button>
+            </div>
+          </form>
         )}
       </div>
     </dialog>

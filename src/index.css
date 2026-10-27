@@ -140,6 +140,11 @@
     max-width: 56ch;
   }
 
+  .schedule-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  @media (max-width: 640px) {
+    .schedule-form { grid-template-columns: 1fr !important; gap: 20px !important; padding: 20px !important; }
+  }
+
   /* Buttons */
   .button {
     display: inline-flex;
