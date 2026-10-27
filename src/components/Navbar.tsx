@@ -8,7 +8,7 @@ type NavbarProps = {
 };
 
 const NAV_LINKS = [
-  { label: 'Simulador', href: '#calculadora', testId: 'nav-simulator-link' },
+  { label: 'Simulador', href: '#simulador', testId: 'nav-simulator-link' },
   { label: 'La idea', href: '#beneficios', testId: 'nav-benefits-link' },
   { label: 'Testimonios', href: '#testimonios', testId: 'nav-testimonials-link' },
   { label: 'Ideas', href: '#ideas', testId: 'nav-ideas-link' },

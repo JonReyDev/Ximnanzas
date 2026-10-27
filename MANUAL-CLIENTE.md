@@ -9,7 +9,7 @@ Sitio oficial:
 Desde la página principal, los visitantes pueden:
 
 - Consultar los servicios de XIMNANZAS.
-- Usar la calculadora de retiro.
+- Usar la simulador de retiro.
 - Leer las notas de la sección **Ideas**.
 - Solicitar información.
 - Agendar una cita.

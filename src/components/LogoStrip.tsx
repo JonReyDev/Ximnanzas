@@ -8,7 +8,7 @@ const LOGOS = [
     h: 'max-h-10',
   },
   {
-    src: '/amib.png',
+    src: '/home_logo_01.png',
     alt: 'AMIB - Asociacion Mexicana de Instituciones Bursatiles',
     id: 'logo-amib',
     h: 'max-h-12',

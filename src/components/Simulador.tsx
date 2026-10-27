@@ -50,14 +50,17 @@ export function Simulador({ onContact }: SimuladorProps) {
     points.map((p) => `L ${p.x} ${p.y}`).join(' ');
 
   return (
-    <section id="calculadora" className="section" style={{ background: 'var(--paper-warm)' }}>
+    <section id="simulador" className="section" style={{ background: 'var(--paper-warm)' }}>
+
       <div className="container-wide Simulador-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '48px', alignItems: 'center' }}>
         {/* Left: text */}
-        <div>
-          <div className="section-kicker">Una primera aproximacion</div>
+        <div> 
+          <div className="section-kicker">Simulador de retiro</div>
+        <div className="shell"><div className="simulator"><div className="simulator-copy"><hr className="gold-rule" /></div></div></div>
           <h2 className="display">Ponle una cifra<br />a tu intencion.</h2>
+             <p className="lead" style={{ marginTop: '20px' }}>Construye una proyección sencilla para conversar sobre tu horizonte. Ajusta tus datos y observa cómo cambia el escenario.</p>
           <p className="lead" style={{ marginTop: '20px' }}>
-            Este ejercicio es ilustrativo: una conversacion personalizada siempre sera mas precisa,
+            Este ejercicio es ilustrativo: una conversación personalizada siempre será más precisa,
             porque tu vida no cabe en una formula.
           </p>
 
@@ -95,7 +98,7 @@ export function Simulador({ onContact }: SimuladorProps) {
         {/* Right: Simulador card */}
         <div className="Simulador-card" data-testid="card-Simulador">
           <div className="Simulador-top">
-            <span className="mono">Simulador de constancia</span>
+            <span className="mono">Simulador de retiro</span>
             <Sparkles size={18} style={{ color: 'rgba(255,255,255,0.4)' }} />
           </div>
 

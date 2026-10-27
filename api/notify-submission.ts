@@ -80,6 +80,7 @@ export default async function handler(request: IncomingMessage, response: Server
       response.setHeader('Content-Type', 'application/json');
       response.end(JSON.stringify({
         error: 'Resend rechazo el envio.',
+        detail: resendError,
         details: resendError,
         hint: 'Verifica que RESEND_FROM_EMAIL use un dominio verificado en Resend. Para este proyecto usa contacto@ximnanzas.com.',
       }));
