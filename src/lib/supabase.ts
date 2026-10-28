@@ -27,7 +27,7 @@ export async function notifySubmission(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type, payload }),
     });
-    if (!response.ok) console.error('No se pudo enviar la notificacion:', await response.text());
+    if (!response.ok) console.error(`No se pudo enviar la notificacion (${response.status}):`, await response.text());
   } catch (error) {
     console.error('No se pudo conectar con el backend de Vercel:', error);
   }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, CheckCircle2, Star } from 'lucide-react';
+import { Send, CheckCircle2 } from 'lucide-react';
 import { notifySubmission, supabase, type Lead } from '@/lib/supabase';
 import { IMAGES } from '@/lib/images';
 
@@ -33,36 +33,35 @@ type TestimonialsProps = {
 
 export function Testimonials() {
   return (
-    <section id="testimonios" className="section" style={{ background: 'var(--paper)' }}>
-        <div className="container-wide">
-          <div style={{ maxWidth: '640px', marginBottom: '64px' }}>
-            <span className="section-kicker">Testimonios</span>
-            <h2 className="display">Historias que nos <span style={{ color: 'var(--blue)' }}>inspiran</span></h2>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }} className="testimonials-grid">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="card" style={{ position: 'relative' }}>
-                <div style={{ display: 'flex', gap: '4px', marginBottom: '16px' }}>
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} size={15} className="star-fill" style={{ fill: 'var(--amber)', color: 'var(--amber)' }} />
-                  ))}
-                </div>
-                <p style={{ color: 'var(--ink-soft)', lineHeight: 1.65, marginBottom: '24px', fontSize: '0.95rem' }}>
-                  "{t.quote}"
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <img src={t.image} alt={t.name} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover' }} />
-                  <div>
-                    <p style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--ink)' }}>{t.name}</p>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+    <section id="testimonios" className="section testimonials-section" style={{ background: 'var(--paper)' }}>
+      <div className="container-wide">
+      
+        <div className="testimonials-heading">
+          <span className="section-kicker">Lo que dicen nuestros clientes</span>
+          <div className="gold-rule"></div>
+          <h2 className="display">Historias reales, <span style={{ color: 'var(--blue)' }}>decisiones claras</span></h2>
         </div>
-      </section>
+
+        <div className="testimonials-grid">
+          {TESTIMONIALS.map((t) => (
+            <article key={t.name} className="testimonial-card">
+              <div className="testimonial-card-meta">
+                <span className="testimonial-stars" aria-label={`${t.rating} de 5 estrellas`}>★★★★★</span>
+                <span className="testimonial-tag">Cliente verificado</span>
+              </div>
+              <p className="testimonial-quote">&ldquo;{t.quote}&rdquo;</p>
+              <div className="testimonial-attribution">
+                <img src={t.image} alt={t.name} className="testimonial-avatar" />
+                <span className="testimonial-who">
+                  <strong>{t.name}</strong>
+                  <small>{t.role}</small>
+                </span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
