@@ -10,12 +10,12 @@ function AppWithPreloader() {
   useEffect(() => {
     const preloader = document.getElementById('ximnanzas-preloader');
     if (!preloader) return;
-    const remainingTime = Math.max(0, 2500 - performance.now());
+    const remainingTime = Math.max(0, 4500 - performance.now());
     let removeTimer: number | undefined;
     const fadeTimer = window.setTimeout(() => {
       preloader.setAttribute('data-ready', '');
       preloader.setAttribute('aria-hidden', 'true');
-      removeTimer = window.setTimeout(() => preloader.remove(), 300);
+      removeTimer = window.setTimeout(() => preloader.remove(), 500);
     }, remainingTime);
     return () => {
       window.clearTimeout(fadeTimer);
