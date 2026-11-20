@@ -8,7 +8,7 @@ import { Simulador } from '@/components/Simulador';
 import { BentoGrid } from '@/components/BentoGrid';
 import { FAQ } from '@/components/FAQ';
 import { Journal } from '@/components/Journal';
-import { ContactSection, Testimonials } from '@/components/Testimonials';
+import { ContactSection } from '@/components/Testimonials';
 import { ServicePage } from '@/components/ServicePage';
 import { ScheduleModal } from '@/components/ScheduleModal';
 import WhatsAppFloat from '@/components/WhatsAppFloat';
@@ -54,7 +54,6 @@ function App() {
             <Simulador onContact={() => openSchedule(undefined)} />
             <LogoStrip />
             <BentoGrid />
-            <Testimonials />
             <FAQ />
             <Journal onContact={() => openSchedule(undefined)} />
             <ContactSection onSchedule={() => openSchedule(undefined)} />

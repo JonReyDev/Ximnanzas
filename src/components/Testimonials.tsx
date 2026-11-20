@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Send, CheckCircle2 } from 'lucide-react';
-import { notifySubmission, supabase, type Lead } from '@/lib/supabase';
+import { useRef, useState } from 'react';
+import { CheckCircle2, Send } from 'lucide-react';
+import { requestAppointment } from '@/lib/whatsapp';
 import { IMAGES } from '@/lib/images';
 
 const TESTIMONIALS = [
@@ -65,23 +65,76 @@ export function Testimonials() {
   );
 }
 
+function ProfileLanyard() {
+  const [angle, setAngle] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [flipped, setFlipped] = useState(false);
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const drag = useRef({ x: 0, moved: false });
+  const portrait = import.meta.env.VITE_ADVISOR_PORTRAIT || `${import.meta.env.BASE_URL}assets/retrato-asesora.png`;
+
+  return (
+    <div className="profile-lanyard">
+      <span className="lanyard-anchor" aria-hidden="true" />
+      <div className={`lanyard-swing ${dragging ? "is-dragging" : ""}`} style={{ transform: `rotate(${angle}deg)` }}>
+        <span className="lanyard-strap" aria-hidden="true" />
+        <button
+          type="button"
+          className="lanyard-badge"
+          aria-label={flipped ? "Mostrar frente de la tarjeta de Ximnanzas" : "Girar tarjeta de Ximnanzas"}
+          aria-pressed={flipped}
+          onPointerDown={(event) => {
+            if (event.button !== 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            drag.current = { x: event.clientX, moved: false };
+            event.currentTarget.setPointerCapture(event.pointerId);
+            setDragging(true);
+          }}
+          onPointerMove={(event) => {
+            if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+            const distance = event.clientX - drag.current.x;
+            if (Math.abs(distance) > 8) drag.current.moved = true;
+            setAngle(Math.max(-24, Math.min(24, -distance / 5)));
+          }}
+          onLostPointerCapture={() => { setDragging(false); setAngle(0); }}
+          onClick={(event) => {
+            if (event.detail === 0 || !drag.current.moved) setFlipped((value) => !value);
+            drag.current.moved = false;
+          }}
+        >
+          <span className="lanyard-face" data-flipped={flipped}>
+            <span className="lanyard-side lanyard-front" aria-hidden={flipped}>
+              <img
+                src={portrait && !photoFailed ? portrait : "/assets/ximnanzas-logo.png"}
+                alt={portrait && !photoFailed ? "Retrato de la asesora patrimonial" : ""}
+                onError={() => setPhotoFailed(true)}
+                className={portrait && !photoFailed ? "lanyard-portrait" : ""}
+                loading="lazy"
+                draggable={false}
+              />
+              <strong>XIMNANZAS</strong>
+            </span>
+            <span className="lanyard-side lanyard-back" aria-hidden={!flipped}>
+              <strong>XIMNANZAS</strong>
+              <span>Asesoría patrimonial</span>
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ContactSection({ onSchedule }: TestimonialsProps) {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) return;
-    setStatus('submitting');
-    const lead: Omit<Lead, 'id'> = {
-      name: form.name, email: form.email, phone: form.phone, message: form.message,
-    };
-    const { error } = await supabase.from('leads').insert([lead]);
-    if (error) { setStatus('error'); return; }
-    await notifySubmission('lead', lead);
-    setStatus('success');
-    setForm({ name: '', email: '', phone: '', message: '' });
-    setTimeout(() => setStatus('idle'), 5000);
+    requestAppointment([
+      ['Nombre', form.name],
+      ['Correo', form.email],
+      ['Teléfono', form.phone],
+      ['Mensaje', form.message],
+    ]);
   };
 
   return (
@@ -93,9 +146,9 @@ export function ContactSection({ onSchedule }: TestimonialsProps) {
           <div>
             <span className="section-kicker" style={{ color: 'var(--amber)' }}>Hablemos</span>
             <h2 className="display" style={{ color: 'var(--paper)' }}>Tu futuro empieza<br />con una conversacion</h2>
+            <ProfileLanyard />
             <p style={{ marginTop: '24px', fontSize: '1.1rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, maxWidth: '480px' }}>
-              Dejanos tus datos y un asesor te contactara en menos de 24 horas. La primera cita
-              es sin costo y sin compromiso. Solo queremos ayudarte a tomar la mejor decision.
+              Comparte tus datos por WhatsApp para solicitar una primera cita sin costo.
             </p>
             <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {['Asesoria personalizada sin costo', 'Respuesta en menos de 24 horas', 'Mas de 15 años de experiencia'].map((item) => (
@@ -112,17 +165,6 @@ export function ContactSection({ onSchedule }: TestimonialsProps) {
 
           {/* Right: form */}
           <div style={{ background: 'var(--paper)', borderRadius: '24px', padding: '36px', boxShadow: '0 24px 64px rgba(0,0,0,0.2)' }}>
-            {status === 'success' ? (
-              <div style={{ textAlign: 'center', padding: '48px 0' }}>
-                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                  <CheckCircle2 size={32} style={{ color: '#16a34a' }} />
-                </div>
-                <h3 className="serif" style={{ fontSize: '1.5rem', fontWeight: 500, marginBottom: '8px' }}>¡Gracias!</h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
-                  Hemos recibido tu informacion. Un asesor te contactara muy pronto.
-                </p>
-              </div>
-            ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <h3 className="serif" style={{ fontSize: '1.3rem', fontWeight: 500, marginBottom: '4px' }}>Solicita informacion</h3>
                 <input className="input" type="text" placeholder="Nombre completo" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -131,16 +173,14 @@ export function ContactSection({ onSchedule }: TestimonialsProps) {
                   <input className="input" type="tel" placeholder="Telefono" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
                 </div>
                 <textarea className="input" placeholder="¿En que te podemos ayudar? (opcional)" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={3} style={{ resize: 'none' }} />
-                {status === 'error' && <p style={{ fontSize: '0.85rem', color: '#ef4444' }}>Ocurrio un error. Intenta de nuevo.</p>}
-                <button type="submit" disabled={status === 'submitting'} className="button button-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                  {status === 'submitting' ? 'Enviando...' : 'Enviar informacion'}
-                  {status !== 'submitting' && <Send size={15} />}
+                <button type="submit" className="button button-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                  Solicitar cita por WhatsApp
+                  <Send size={15} />
                 </button>
                 <p style={{ fontSize: '0.75rem', color: 'var(--muted)', textAlign: 'center' }}>
                   Al enviar aceptas nuestro aviso de privacidad.
                 </p>
               </form>
-            )}
           </div>
         </div>
       </section>

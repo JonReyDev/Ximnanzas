@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 const PHRASES = [
-  'Deduccion fiscal hasta el 100%',
+  'Deducción fiscal conforme a los requisitos del SAT',
   'Interes compuesto trabajando por ti',
   'Proteccion ante lo imprevisto',
   'Libertad financiera a tu alcance',
