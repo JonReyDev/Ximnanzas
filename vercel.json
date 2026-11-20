@@ -12,5 +12,29 @@
       "destination": "https://ximnanzas.com/$1",
       "permanent": true
     }
+  ],
+  "buildCommand": "node scripts/build-release.mjs",
+  "outputDirectory": "dist/release",
+  "rewrites": [
+    {
+      "source": "/prospectos",
+      "destination": "/panel/index.html"
+    },
+    {
+      "source": "/seguro-de-vida",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/inversion-inteligente",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/gastos-medicos-mayores",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/auto-y-hogar",
+      "destination": "/index.html"
+    }
   ]
 }

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulador de retiro y asesoría patrimonial | Ximnanzas</title>
+    <meta name="description" content="Simula tu ahorro para el retiro y revisa tu proyección con Ximnanzas. La primera charla de orientación es sin costo." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="Simulador de retiro | Ximnanzas" />
+    <meta property="og:description" content="Simula tu ahorro para el retiro y revisa tu proyección con Ximnanzas. La primera charla de orientación es sin costo." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Simulador de retiro | Ximnanzas" />
+    <meta name="twitter:description" content="Simula tu ahorro para el retiro y revisa tu proyección con Ximnanzas. La primera charla de orientación es sin costo." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      #ximnanzas-preloader { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; background: #102238; color: #edcf86; pointer-events: none; animation: preloader-exit 250ms 4s both; }
+      #ximnanzas-preloader[data-ready] { animation: preloader-exit 250ms both; }
+      .preloader-monogram { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border: 1px solid #edcf8680; border-radius: 50%; font: 2rem Georgia, serif; }
+      .preloader-brand { font: 600 0.75rem system-ui, sans-serif; letter-spacing: 0.28em; }
+      .preloader-progress { width: 4rem; height: 2px; background: #edcf8640; overflow: hidden; }
+      .preloader-progress::after { content: ""; display: block; width: 50%; height: 100%; background: #edcf86; animation: preloader-progress 780ms ease-in-out infinite alternate; }
+      @keyframes preloader-progress { from { transform: translateX(-100%); } to { transform: translateX(200%); } }
+      @keyframes preloader-exit { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+      @media (prefers-reduced-motion: reduce) { .preloader-progress::after { animation: none; } #ximnanzas-preloader[data-ready] { animation-duration: 0s; } }
+    </style>
+    <script type="module" crossorigin src="/assets/index-BdQyMUbJ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BTjGD_Gj.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="ximnanzas-preloader" role="status" aria-label="Cargando Ximnanzas">
+      <span class="preloader-monogram" aria-hidden="true">X</span>
+      <span class="preloader-brand" aria-hidden="true">XIMNANZAS</span>
+      <span class="preloader-progress" aria-hidden="true"></span>
+    </div>
+    <noscript><style>#ximnanzas-preloader{display:none}</style><p>Activa JavaScript para usar el sitio de Ximnanzas.</p></noscript>
+  </body>
+</html>
