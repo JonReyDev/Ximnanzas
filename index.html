@@ -18,9 +18,25 @@
     <meta property="og:image" content="public/XIMNANZAS.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="public/XIMNANZAS.png">
+    <style>
+      #ximnanzas-preloader { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; background: #102238; color: #edcf86; pointer-events: none; animation: preloader-exit 250ms 4s both; }
+      #ximnanzas-preloader[data-ready] { animation: preloader-exit 250ms both; }
+      .preloader-monogram { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border: 1px solid #edcf8680; border-radius: 50%; font: 2rem Georgia, serif; }
+      .preloader-brand { font: 600 0.75rem system-ui, sans-serif; letter-spacing: 0.28em; }
+      .preloader-progress { width: 4rem; height: 2px; background: #edcf8640; overflow: hidden; }
+      .preloader-progress::after { content: ""; display: block; width: 50%; height: 100%; background: #edcf86; animation: preloader-progress 780ms ease-in-out infinite alternate; }
+      @keyframes preloader-progress { from { transform: translateX(-100%); } to { transform: translateX(200%); } }
+      @keyframes preloader-exit { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+      @media (prefers-reduced-motion: reduce) { .preloader-progress::after { animation: none; } #ximnanzas-preloader[data-ready] { animation-duration: 0s; } }
+    </style>
 </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+        <div id="ximnanzas-preloader" role="status" aria-label="Cargando Ximnanzas">
+      <span class="preloader-monogram" aria-hidden="true">X</span>
+      <span class="preloader-brand" aria-hidden="true">XIMNANZAS</span>
+      <span class="preloader-progress" aria-hidden="true"></span>
+    </div>
+<script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

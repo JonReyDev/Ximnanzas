@@ -37,16 +37,16 @@ export function LogoStrip() {
         transition={{ duration: 0.7 }}
       >
         <p className="mb-10 text-center text-[11px] font-semibold uppercase tracking-[0.25em] text-neutral-500">
-          Distribuidor autorizado - Instituciones que nos respaldan
+          La confianza también se construye con respaldo
         </p>
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-14 gap-y-8">
           {LOGOS.map((logo) => (
-            <div key={logo.id} className="flex h-14 min-w-[150px] items-center justify-center">
+            <div key={logo.id} className="flex h-24 min-w-[150px] items-center justify-center rounded-xl border border-black/10 bg-white px-5">
               <img
                 src={logo.src}
                 alt={logo.alt}
                 data-testid={logo.id}
-                className={`${logo.h} w-auto object-contain opacity-80 transition-[opacity,transform] duration-300 hover:scale-105 hover:opacity-100`}
+                className={`${logo.h} w-auto object-contain opacity-100 transition-[opacity,transform] duration-300 hover:scale-105 hover:opacity-100`}
               />
             </div>
           ))}

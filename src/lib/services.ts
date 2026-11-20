@@ -22,7 +22,7 @@ export const SERVICES: Service[] = [
     description:
       'Asegura el bienestar financiero de tu familia ante cualquier eventualidad. Un seguro de vida es un acto de amor que garantiza que los tuyos estén cubiertos sin importar qué pase.',
     icon: 'HeartPulse',
-    image: 'https://images.pexels.com/photos/4975543/pexels-photo-4975543.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+    image: '/assets/servicio-vida.jpg',
     accent: 'rose',
     benefits: [
       { title: 'Pago inmediato', description: 'El beneficio se entrega a tus beneficiarios sin trámites largos.', icon: 'Wallet' },
@@ -40,7 +40,7 @@ export const SERVICES: Service[] = [
     description:
       'Construye tu patrimonio con estrategias de inversión diseñadas para tus objetivos. Ya sea para tu retiro, la educación de tus hijos o tu libertad financiera, te acompañamos paso a paso.',
     icon: 'TrendingUp',
-    image: 'https://images.pexels.com/photos/6770610/pexels-photo-6770610.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+    image: '/assets/servicio-inversion.jpg',
     accent: 'emerald',
     benefits: [
       { title: 'Interés compuesto', description: 'Tu dinero crece exponencialmente año con año.', icon: 'ChartCandlestick' },
@@ -58,7 +58,7 @@ export const SERVICES: Service[] = [
     description:
       'Protege tu patrimonio ante enfermedades graves o accidentes. Un solo incidente médico puede destruir años de ahorro. Con nosotros, tú y tu familia están cubiertos en los mejores hospitales.',
     icon: 'Stethoscope',
-    image: 'https://images.pexels.com/photos/19563295/pexels-photo-19563295.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+    image: '/assets/servicio-gastos-medicos.jpg',
     accent: 'sky',
     benefits: [
       { title: 'Cobertura nacional', description: 'Acceso a más de 200 hospitales en todo el país.', icon: 'Building2' },

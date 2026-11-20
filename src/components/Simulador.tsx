@@ -28,30 +28,7 @@ export function Simulador({ onContact }: SimuladorProps) {
   const totalInterest = finalBalance - totalContributed;
   const balanceRef = useRef<HTMLElement | null>(null);
   const currentBalanceRef = useRef(0);
-  const chartLineRef = useRef<SVGPathElement | null>(null);
-
-  // Chart
-  const chartW = 600;
-  const chartH = 220;
-  const padX = 36;
-  const padY = 16;
-  const maxVal = Math.max(...projection.map((p) => p.balance), 1);
-  const chartWInner = chartW - padX * 2;
-  const chartHInner = chartH - padY * 2;
-
-  const points = projection.map((p, i) => {
-    const x = padX + (i / Math.max(projection.length - 1, 1)) * chartWInner;
-    const y = padY + chartHInner - (p.balance / maxVal) * chartHInner;
-    return { x, y, ...p };
-  });
-
-  const areaPath = `M ${padX} ${padY + chartHInner} ` +
-    points.map((p) => `L ${p.x} ${p.y}`).join(' ') +
-    ` L ${padX + chartWInner} ${padY + chartHInner} Z`;
-
-  const linePath = `M ${points[0]?.x ?? 0} ${points[0]?.y ?? 0} ` +
-    points.map((p) => `L ${p.x} ${p.y}`).join(' ');
-
+  const milestones = projection.filter((_, index) => index % Math.ceil(projection.length / 5) === 0 || index === projection.length - 1);
   useEffect(() => {
     let cancelled = false;
     let stopAnimation = () => {};
@@ -90,45 +67,13 @@ export function Simulador({ onContact }: SimuladorProps) {
     };
   }, [finalBalance]);
 
-  useEffect(() => {
-    let cancelled = false;
-    let stopAnimation = () => {};
-    const path = chartLineRef.current;
-    if (!path) return undefined;
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      path.removeAttribute('pathLength');
-      path.removeAttribute('stroke-dasharray');
-      path.removeAttribute('stroke-dashoffset');
-      return undefined;
-    }
-
-    void import('animejs').then(({ animate, svg }) => {
-      if (cancelled) return;
-      const [drawable] = svg.createDrawable(path);
-      drawable.setAttribute('draw', '0 0');
-      const animation = animate(drawable, {
-        draw: '0 1',
-        duration: 700,
-        ease: 'out(3)',
-      });
-      stopAnimation = () => {
-        animation.revert();
-      };
-    });
-
-    return () => {
-      cancelled = true;
-      stopAnimation();
-    };
-  }, [linePath]);
-
   return (
     <section id="simulador" className="section" style={{ background: 'var(--paper-warm)' }}>
 
       <div className="container-wide Simulador-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '48px', alignItems: 'center' }}>
         {/* Left: text */}
         <div> 
+          <img className="simulador-retrato" src="/assets/servicio-retiro.jpg" alt="Pareja mayor paseando en un parque" loading="lazy" />
           <div className="section-kicker">Simulador de retiro</div>
         <div className="shell"><div className="simulator"><div className="simulator-copy"><hr className="gold-rule" /></div></div></div>
           <h2 className="display">Ponle una cifra<br />a tu intencion.</h2>
@@ -182,32 +127,8 @@ export function Simulador({ onContact }: SimuladorProps) {
             <span>podria ser una referencia para tu fondo en {years} años*</span>
           </div>
 
-          {/* Chart */}
-          <div style={{
-            background: 'rgba(255,255,255,0.05)', borderRadius: '14px',
-            padding: '12px', marginBottom: '24px',
-          }}>
-            <svg viewBox={`0 0 ${chartW} ${chartH}`} style={{ width: '100%', height: 'auto' }} preserveAspectRatio="xMidYMid meet">
-              <defs>
-                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#c5a35f" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="#c5a35f" stopOpacity="0.02" />
-                </linearGradient>
-              </defs>
-              {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-                <line key={t} x1={padX} y1={padY + t * chartHInner} x2={padX + chartWInner} y2={padY + t * chartHInner} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-              ))}
-              <path d={areaPath} fill="url(#areaGrad)" />
-              <path ref={chartLineRef} d={linePath} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              {points.filter((_, i) => i % Math.ceil(projection.length / 5) === 0 || i === points.length - 1).map((p) => (
-                <text key={p.year} x={p.x} y={chartH - 2} textAnchor="middle" fill="rgba(255,255,255,0.3)" style={{ fontSize: '9px' }}>
-                  Año {p.year}
-                </text>
-              ))}
-            </svg>
-          </div>
-
           {/* Sliders */}
+          <div className="projection-controls">
           <label className="range-label">
             Aportacion mensual <b>${monthly.toLocaleString('es-MX')}</b>
             <input type="range" min={500} max={50000} step={500} value={monthly} onChange={(e) => setMonthly(Number(e.target.value))} data-testid="input-Simulador-monthly" />
@@ -220,6 +141,21 @@ export function Simulador({ onContact }: SimuladorProps) {
             Plazo <b>{years} años</b>
             <input type="range" min={5} max={40} value={years} onChange={(e) => setYears(Number(e.target.value))} data-testid="input-Simulador-years" />
           </label>
+          </div>
+          <figure aria-label="Crecimiento proyectado">
+            <div className="particle-chart-bars" style={{ gridTemplateColumns: `repeat(${milestones.length}, minmax(0, 1fr))` }}>
+              {milestones.map((point) => <div key={point.year} className="text-center">
+                <div className="particle-chart-tube"><div className="particle-chart-fill" style={{ height: `${point.balance / Math.max(finalBalance, 1) * 100}%` }} /></div>
+                <small>{age + point.year} años</small>
+              </div>)}
+            </div>
+          </figure>
+          <table className="projection-summary">
+            <caption>Proyección por edad · MXN</caption>
+            <thead><tr><th scope="col">Edad</th><th scope="col">Aportado</th><th scope="col">Saldo</th></tr></thead>
+            <tbody>{milestones.map((point) => <tr key={point.year}><th scope="row">{age + point.year}</th><td>{formatCompact(point.totalContributed)}</td><td>{formatCompact(point.balance)}</td></tr>)}</tbody>
+          </table>
+
 
           {/* Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '20px' }}>
