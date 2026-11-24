@@ -17,30 +17,32 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <style>
       #brand-preloader { position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; justify-items: center; gap: 1rem; background: #0d223a; pointer-events: none; animation: preloader-exit 350ms 3.5s both; }
-      .preloader-logos { position: relative; width: min(88vw, 26rem); height: 9rem; }
-      .preloader-logo { position: absolute; inset: 0; margin: auto; display: grid; place-items: center; width: 7rem; height: 7rem; padding: .75rem; border-radius: 1.25rem; background: #fff; }
-      .preloader-logo img { max-width: 100%; max-height: 100%; width: auto; height: auto; }
-      .preloader-allianz { z-index: 1; animation: preloader-allianz 2.35s ease-in-out both; }
-      .preloader-ximnanzas { animation: preloader-ximnanzas 2.45s ease-in-out both; }
+      .preloader-wordmark { position: relative; display: grid; color: #fff; font: 700 clamp(1.8rem, 7.8vw, 4.5rem)/1.2 ui-monospace, monospace; letter-spacing: .06em; }
+      .preloader-letters, .preloader-static { grid-area: 1 / 1; }
+      .preloader-letters { display: flex; justify-content: center; }
+      .preloader-letter { position: relative; display: grid; width: 1ch; text-align: center; }
+      .preloader-letter > span { grid-area: 1 / 1; }
+      .preloader-original { color: #fff; animation: preloader-letter-out 320ms var(--shift) both; }
+      .preloader-scan { color: transparent; -webkit-text-stroke: 1px #e9cd87; animation: preloader-letter-scan 320ms var(--shift) both; }
+      .preloader-final { color: #e9cd87; animation: preloader-letter-in 320ms var(--shift) both; }
+      .preloader-static { display: none; color: #e9cd87; }
       .preloader-progress { width: 5rem; height: 2px; background: #e9cd87; transform-origin: left; animation: preloader-progress 3.5s linear both; }
-      @keyframes preloader-allianz {
-        0% { opacity: 0; transform: translateX(-75%) scale(.85); }
-        23%, 35% { opacity: 1; transform: translateX(-66%) scale(1); }
-        68% { opacity: 1; transform: translateX(0) scale(.94); }
-        100% { opacity: 0; transform: translateX(0) scale(.8); }
+      @keyframes preloader-letter-out { 0% { opacity: 1; } 30%, 100% { opacity: 0; } }
+      @keyframes preloader-letter-scan {
+        0%, 100% { opacity: 0; }
+        30% { opacity: .75; transform: scaleY(.8) translateY(-.12em); }
+        58% { opacity: 1; transform: scaleY(1.07) translateY(.04em); }
       }
-      @keyframes preloader-ximnanzas {
-        0% { opacity: 0; transform: translateX(75%) scale(.85); }
-        23%, 35% { opacity: 1; transform: translateX(66%) scale(1); }
-        65% { opacity: 1; transform: translateX(0) scale(.94); }
-        100% { opacity: 1; transform: translateX(0) scale(1.09); }
+      @keyframes preloader-letter-in {
+        0%, 55% { opacity: 0; transform: translateY(.12em); }
+        100% { opacity: 1; transform: translateY(0); }
       }
       @keyframes preloader-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
       @keyframes preloader-exit { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
       @media (prefers-reduced-motion: reduce) {
         #brand-preloader { animation-delay: .3s; animation-duration: 1ms; }
-        .preloader-allianz, .preloader-progress { display: none; }
-        .preloader-ximnanzas { animation: none; }
+        .preloader-letters, .preloader-progress { display: none; }
+        .preloader-static { display: block; }
       }
     </style>
     <script type="module" crossorigin src="/assets/index-BdQyMUbJ.js"></script>
@@ -53,9 +55,19 @@
   <body>
     <div id="root"></div>
     <div id="brand-preloader" role="status" aria-label="Cargando Ximnanzas">
-      <div class="preloader-logos" aria-hidden="true">
-        <span class="preloader-logo preloader-allianz"><img src="/assets/allianz_1788827777448.png" alt=""></span>
-        <span class="preloader-logo preloader-ximnanzas"><img src="/assets/ximnanzas-logo.png" alt=""></span>
+      <div class="preloader-wordmark" aria-hidden="true">
+        <div class="preloader-letters">
+          <span class="preloader-letter" style="--shift:650ms"><span class="preloader-original"> </span><span class="preloader-scan">7</span><span class="preloader-final">X</span></span>
+          <span class="preloader-letter" style="--shift:805ms"><span class="preloader-original">A</span><span class="preloader-scan">F</span><span class="preloader-final">I</span></span>
+          <span class="preloader-letter" style="--shift:960ms"><span class="preloader-original">L</span><span class="preloader-scan">3</span><span class="preloader-final">M</span></span>
+          <span class="preloader-letter" style="--shift:1115ms"><span class="preloader-original">L</span><span class="preloader-scan">A</span><span class="preloader-final">N</span></span>
+          <span class="preloader-letter" style="--shift:1270ms"><span class="preloader-original">I</span><span class="preloader-scan">9</span><span class="preloader-final">A</span></span>
+          <span class="preloader-letter" style="--shift:1425ms"><span class="preloader-original">A</span><span class="preloader-scan">C</span><span class="preloader-final">N</span></span>
+          <span class="preloader-letter" style="--shift:1580ms"><span class="preloader-original">N</span><span class="preloader-scan">2</span><span class="preloader-final">Z</span></span>
+          <span class="preloader-letter" style="--shift:1735ms"><span class="preloader-original">Z</span><span class="preloader-scan">B</span><span class="preloader-final">A</span></span>
+          <span class="preloader-letter" style="--shift:1890ms"><span class="preloader-original"> </span><span class="preloader-scan">4</span><span class="preloader-final">S</span></span>
+        </div>
+        <span class="preloader-static">XIMNANZAS</span>
       </div>
       <span class="preloader-progress" aria-hidden="true"></span>
     </div>
