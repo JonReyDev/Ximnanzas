@@ -16,15 +16,32 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <style>
-      #ximnanzas-preloader { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; background: #102238; color: #edcf86; pointer-events: none; animation: preloader-exit 250ms 4s both; }
-      #ximnanzas-preloader[data-ready] { animation: preloader-exit 250ms both; }
-      .preloader-monogram { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border: 1px solid #edcf8680; border-radius: 50%; font: 2rem Georgia, serif; }
-      .preloader-brand { font: 600 0.75rem system-ui, sans-serif; letter-spacing: 0.28em; }
-      .preloader-progress { width: 4rem; height: 2px; background: #edcf8640; overflow: hidden; }
-      .preloader-progress::after { content: ""; display: block; width: 50%; height: 100%; background: #edcf86; animation: preloader-progress 780ms ease-in-out infinite alternate; }
-      @keyframes preloader-progress { from { transform: translateX(-100%); } to { transform: translateX(200%); } }
+      #brand-preloader { position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; justify-items: center; gap: 1rem; background: #0d223a; pointer-events: none; animation: preloader-exit 350ms 3.5s both; }
+      .preloader-logos { position: relative; width: min(88vw, 26rem); height: 9rem; }
+      .preloader-logo { position: absolute; inset: 0; margin: auto; display: grid; place-items: center; width: 7rem; height: 7rem; padding: .75rem; border-radius: 1.25rem; background: #fff; }
+      .preloader-logo img { max-width: 100%; max-height: 100%; width: auto; height: auto; }
+      .preloader-allianz { z-index: 1; animation: preloader-allianz 2.35s ease-in-out both; }
+      .preloader-ximnanzas { animation: preloader-ximnanzas 2.45s ease-in-out both; }
+      .preloader-progress { width: 5rem; height: 2px; background: #e9cd87; transform-origin: left; animation: preloader-progress 3.5s linear both; }
+      @keyframes preloader-allianz {
+        0% { opacity: 0; transform: translateX(-75%) scale(.85); }
+        23%, 35% { opacity: 1; transform: translateX(-66%) scale(1); }
+        68% { opacity: 1; transform: translateX(0) scale(.94); }
+        100% { opacity: 0; transform: translateX(0) scale(.8); }
+      }
+      @keyframes preloader-ximnanzas {
+        0% { opacity: 0; transform: translateX(75%) scale(.85); }
+        23%, 35% { opacity: 1; transform: translateX(66%) scale(1); }
+        65% { opacity: 1; transform: translateX(0) scale(.94); }
+        100% { opacity: 1; transform: translateX(0) scale(1.09); }
+      }
+      @keyframes preloader-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
       @keyframes preloader-exit { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
-      @media (prefers-reduced-motion: reduce) { .preloader-progress::after { animation: none; } #ximnanzas-preloader[data-ready] { animation-duration: 0s; } }
+      @media (prefers-reduced-motion: reduce) {
+        #brand-preloader { animation-delay: .3s; animation-duration: 1ms; }
+        .preloader-allianz, .preloader-progress { display: none; }
+        .preloader-ximnanzas { animation: none; }
+      }
     </style>
     <script type="module" crossorigin src="/assets/index-BdQyMUbJ.js"></script>
     <script type="module" src="/assets/published-ideas.js"></script>
@@ -35,11 +52,13 @@
   </head>
   <body>
     <div id="root"></div>
-    <div id="ximnanzas-preloader" role="status" aria-label="Cargando Ximnanzas">
-      <span class="preloader-monogram" aria-hidden="true">X</span>
-      <span class="preloader-brand" aria-hidden="true">XIMNANZAS</span>
+    <div id="brand-preloader" role="status" aria-label="Cargando Ximnanzas">
+      <div class="preloader-logos" aria-hidden="true">
+        <span class="preloader-logo preloader-allianz"><img src="/assets/allianz_1788827777448.png" alt=""></span>
+        <span class="preloader-logo preloader-ximnanzas"><img src="/assets/ximnanzas-logo.png" alt=""></span>
+      </div>
       <span class="preloader-progress" aria-hidden="true"></span>
     </div>
-    <noscript><style>#ximnanzas-preloader{display:none}</style><p>Activa JavaScript para usar el sitio de Ximnanzas.</p></noscript>
+    <noscript><style>#brand-preloader{display:none}</style><p>Activa JavaScript para usar el sitio de Ximnanzas.</p></noscript>
   </body>
 </html>
