@@ -59,7 +59,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const saved = await fetch(new URL('/rest/v1/leads', supabaseUrl), {
       method: 'POST',
       signal: AbortSignal.timeout(8000),
-      headers: { apikey: supabaseKey, 'Content-Type': 'application/json', Prefer: 'resolution=ignore-duplicates,return=minimal' },
+      headers: { apikey: supabaseKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify({
         id: leadId,
         name: quote.name.trim(),
@@ -69,7 +69,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         message: 'Solicitó su proyección OptiMaxx plus por correo.',
       }),
     });
-    if (!saved.ok) {
+    const duplicate = saved.status === 409 && await saved.json().then(
+      (error) => error.code === '23505' && error.message?.includes('"leads_pkey"'),
+      () => false,
+    );
+    if (!saved.ok && !duplicate) {
       console.error('Supabase no registró el prospecto de proyección', saved.status);
       return reply(502, { error: 'No se pudo registrar tu solicitud. Intenta de nuevo en unos minutos.' });
     }
