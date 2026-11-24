@@ -37,14 +37,14 @@ const ARTICLES = [
     testId: 'button-journal-habits',
   },
 ];
-type Article = (typeof ARTICLES)[number];
+type Article = (typeof ARTICLES)[number] & { image?: string };
 
 type JournalProps = {
   onContact: () => void;
 };
 
 export function Journal({ onContact }: JournalProps) {
-  const [articles, setArticles] = useState(ARTICLES);
+  const [articles, setArticles] = useState<Article[]>(ARTICLES);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
   useEffect(() => {
@@ -52,13 +52,17 @@ export function Journal({ onContact }: JournalProps) {
     const loadPosts = async () => {
       const { data } = await supabase.from('blog_posts').select('id, tag, title, excerpt, content, published, created_at').eq('published', true).order('created_at', { ascending: false });
       if (!mounted || !data?.length) return;
-      const publishedPosts = (data as BlogPost[]).map((post) => ({
-        tag: `${post.tag} · lectura`,
-        title: post.title,
-        excerpt: post.excerpt,
-        paragraphs: post.content.split(/\n+/).filter(Boolean),
-        testId: `button-blog-${post.id}`,
-      }));
+      const publishedPosts = (data as BlogPost[]).map((post) => {
+        const cover = post.content.match(/^!\[Portada\]\(((?:https:\/\/[^\s]+|data:image\/jpeg;base64,[A-Za-z0-9+/=]+))\)\r?\n/);
+        return {
+          tag: `${post.tag} · lectura`,
+          title: post.title,
+          excerpt: post.excerpt,
+          image: cover?.[1],
+          paragraphs: (cover ? post.content.slice(cover[0].length) : post.content).split(/\n+/).filter(Boolean),
+          testId: `button-blog-${post.id}`,
+        };
+      });
       setArticles([...publishedPosts, ...ARTICLES]);
     };
     void loadPosts();
@@ -100,6 +104,7 @@ export function Journal({ onContact }: JournalProps) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }} className="journal-grid">
             {articles.map((article) => (
               <article key={article.title} className="journal-card">
+                {article.image && <img src={article.image} alt="" loading="lazy" referrerPolicy="no-referrer" className="mb-4 aspect-video w-full rounded-lg object-cover" />}
                 <small>{article.tag}</small>
                 <h3>{article.title}</h3>
                 <p>{article.excerpt}</p>
@@ -135,6 +140,7 @@ export function Journal({ onContact }: JournalProps) {
             </button>
             <small className="section-kicker" style={{ marginBottom: '14px' }}>{selectedArticle.tag}</small>
             <h2 id="journal-modal-title" className="display" style={{ paddingRight: '48px', fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}>{selectedArticle.title}</h2>
+            {selectedArticle.image && <img src={selectedArticle.image} alt="" referrerPolicy="no-referrer" className="mt-4 max-h-80 w-full rounded-lg object-contain" />}
             <div style={{ display: 'grid', gap: '18px', marginTop: '28px', color: 'var(--ink-soft)', fontSize: '1rem', lineHeight: 1.75 }}>
               {selectedArticle.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>

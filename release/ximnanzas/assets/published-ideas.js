@@ -33,7 +33,12 @@ async function loadPublishedIdeas() {
   close.className = 'mt-7 underline';
   close.textContent = 'Cerrar nota';
   close.addEventListener('click', () => dialog.close());
-  dialog.append(heading, body, close);
+  const cover = document.createElement('img');
+  cover.alt = '';
+  cover.referrerPolicy = 'no-referrer';
+  cover.style.cssText = 'width:100%;max-height:320px;object-fit:contain;margin-top:1rem';
+  cover.addEventListener('error', () => { cover.hidden = true; });
+  dialog.append(heading, cover, body, close);
 
   for (const post of posts) {
     const card = template.cloneNode(true);
@@ -43,9 +48,23 @@ async function loadPublishedIdeas() {
     category.textContent = post.tag;
     card.querySelector('h3').textContent = post.title;
     excerpt.textContent = post.excerpt;
+    const image = post.content.match(/^!\[Portada\]\(((?:https:\/\/[^\s]+|data:image\/jpeg;base64,[A-Za-z0-9+/=]+))\)\r?\n/);
+    if (image) {
+      const thumbnail = document.createElement('img');
+      thumbnail.alt = '';
+      thumbnail.loading = 'lazy';
+      thumbnail.referrerPolicy = 'no-referrer';
+      thumbnail.style.cssText = 'width:100%;aspect-ratio:16/9;object-fit:cover;margin-block:1rem;border-radius:.5rem';
+      thumbnail.addEventListener('error', () => thumbnail.remove(), { once: true });
+      thumbnail.src = image[1];
+      card.insertBefore(thumbnail, card.children[1]);
+    }
     card.addEventListener('click', () => {
       heading.textContent = post.title;
-      body.textContent = post.content;
+      cover.hidden = !image;
+      if (image) cover.src = image[1];
+      else cover.removeAttribute('src');
+      body.textContent = image ? post.content.slice(image[0].length) : post.content;
       dialog.showModal();
     });
     grid.append(card);

@@ -1,3 +1,4 @@
+import { imageUrl, resizeBlogImage } from '@/lib/blog-image';
 import { useEffect, useState } from 'react';
 import { Download, LogOut, RefreshCw, Trash2 } from 'lucide-react';
 import { isSupabaseConfigured, supabase, type BlogPost } from '@/lib/supabase';
@@ -56,6 +57,8 @@ export function ProspectosPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'leads' | 'appointments' | 'ideas'>('leads');
+  const [coverUrl, setCoverUrl] = useState('');
+  const [coverFile, setCoverFile] = useState<File>();
   const [postForm, setPostForm] = useState({ tag: 'Ideas', title: '', excerpt: '', content: '', published: true });
 
   const loadData = async () => {
@@ -127,18 +130,36 @@ export function ProspectosPage() {
     appointment.name, appointment.phone, appointment.date, appointment.time, appointment.created_at ? new Date(appointment.created_at).toLocaleString('es-MX') : '',
   ]));
 
-  const savePost = async (event: React.FormEvent) => {
+  const savePost = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
     setLoading(true);
+    setPostFeedback('');
     setError('');
-    const { data, error: postError } = await supabase.from('blog_posts').insert([postForm]).select('*').single();
-    setLoading(false);
-    if (postError) {
-      setError('No se pudo guardar la nota. Verifica que la migración del blog esté aplicada.');
-      return;
+    try {
+      if (coverFile && coverUrl.trim()) {
+        throw new Error('Elige una imagen del equipo o pega una URL.');
+      }
+      let cover = '';
+      if (coverFile) cover = await resizeBlogImage(coverFile);
+      else if (coverUrl.trim()) {
+        try { cover = imageUrl(coverUrl); }
+        catch { throw new Error('Escribe una URL de imagen válida que use HTTPS.'); }
+      }
+      const content = cover ? `![Portada](${cover})\n${postForm.content}` : postForm.content;
+      const { data, error: postError } = await supabase.from('blog_posts').insert([{ ...postForm, content }]).select('*').single();
+      if (postError) throw new Error('No se pudo guardar la nota. Intenta de nuevo.');
+      setPosts((current) => [data as BlogPost, ...current]);
+      setPostForm({ tag: 'Ideas', title: '', excerpt: '', content: '', published: true });
+      setCoverUrl('');
+      setCoverFile(undefined);
+      form.reset();
+      setPostFeedback('Nota guardada.');
+    } catch (cause) {
+      setPostFeedback(cause instanceof Error ? cause.message : 'No se pudo guardar la nota.');
+    } finally {
+      setLoading(false);
     }
-    setPosts((current) => [data as BlogPost, ...current]);
-    setPostForm({ tag: 'Ideas', title: '', excerpt: '', content: '', published: true });
   };
 
   const deletePost = async (post: BlogPost) => {
@@ -211,6 +232,23 @@ export function ProspectosPage() {
             <input className="input" placeholder="Título de la nota" value={postForm.title} onChange={(event) => setPostForm({ ...postForm, title: event.target.value })} required />
             <textarea className="input" placeholder="Resumen breve para la tarjeta" value={postForm.excerpt} onChange={(event) => setPostForm({ ...postForm, excerpt: event.target.value })} rows={3} required />
             <textarea className="input" placeholder="Contenido completo de la nota" value={postForm.content} onChange={(event) => setPostForm({ ...postForm, content: event.target.value })} rows={8} required />
+            <fieldset disabled={loading}>
+              <legend>Imagen de portada (opcional)</legend>
+              <label>URL de la imagen
+                <input className="input" type="url" placeholder="https://…" value={coverUrl} onChange={(event) => setCoverUrl(event.target.value)} disabled={Boolean(coverFile)} />
+              </label>
+              <label>O elige una imagen de tu computadora
+                <input className="input" type="file" name="coverFile" accept="image/jpeg,image/png,image/webp" onChange={(event) => setCoverFile(event.target.files?.[0])} disabled={Boolean(coverUrl.trim())} />
+              </label>
+              {coverFile && (
+                <button type="button" className="button button-ghost" onClick={(event) => {
+                  const input = event.currentTarget.form?.elements.namedItem('coverFile');
+                  if (input instanceof HTMLInputElement) input.value = '';
+                  setCoverFile(undefined);
+                }}>Quitar imagen</button>
+              )}
+              <small>JPG, PNG o WebP de hasta 10 MB. La imagen se ajusta al guardar.</small>
+            </fieldset>
             <label className="prospectos-publish-toggle"><input type="checkbox" checked={postForm.published} onChange={(event) => setPostForm({ ...postForm, published: event.target.checked })} /> Publicar en Ideas al guardar</label>
             <button className="button button-primary" type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Guardar nota'}</button>
           </form>
