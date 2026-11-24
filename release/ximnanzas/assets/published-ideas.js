@@ -21,24 +21,48 @@ async function loadPublishedIdeas() {
   const grid = document.createElement('div');
   grid.className = template.parentElement.className;
   const dialog = document.createElement('dialog');
-  dialog.className = 'm-auto max-h-[90vh] w-full max-w-2xl overflow-y-auto bg-[#f7f5f0] p-8 text-[#102238] shadow-2xl md:p-12';
+  dialog.className = 'm-auto max-h-[90vh] max-w-2xl overflow-y-auto bg-[#f7f5f0] p-8 text-[#102238] shadow-2xl md:p-12';
   dialog.setAttribute('aria-labelledby', 'published-idea-title');
   const heading = document.createElement('h2');
   heading.id = 'published-idea-title';
-  heading.className = template.querySelector('h3').className;
+  heading.className = 'mt-5 max-w-xl font-editorial text-4xl leading-tight tracking-[-.05em] md:text-5xl';
+  const label = document.createElement('p');
+  label.className = 'eyebrow text-[#003781]';
   const body = document.createElement('div');
-  body.className = 'mt-4 whitespace-pre-wrap';
+  body.className = 'mt-7 whitespace-pre-wrap text-base font-light leading-relaxed text-[#526276]';
   const close = document.createElement('button');
   close.type = 'button';
-  close.className = 'mt-7 underline';
-  close.textContent = 'Cerrar nota';
+  close.className = 'absolute right-5 top-5 p-2 text-[#526276] hover:text-[#003781]';
+  close.setAttribute('aria-label', 'Cerrar nota');
+  close.textContent = '✕';
+  close.autofocus = true;
   close.addEventListener('click', () => dialog.close());
   const cover = document.createElement('img');
   cover.alt = '';
   cover.referrerPolicy = 'no-referrer';
   cover.style.cssText = 'width:100%;max-height:320px;object-fit:contain;margin-top:1rem';
   cover.addEventListener('error', () => { cover.hidden = true; });
-  dialog.append(heading, cover, body, close);
+  const footer = document.createElement('div');
+  footer.className = 'mt-10 border-t border-[#102238]/15 pt-7';
+  const prompt = document.createElement('p');
+  prompt.className = 'text-sm font-light text-[#526276]';
+  prompt.textContent = '¿Quieres llevar esta idea a tu propio plan?';
+  const appointment = document.createElement('button');
+  appointment.type = 'button';
+  appointment.className = 'star-border mt-4 inline-flex items-center gap-3 bg-[#003781] px-6 py-4 text-[10px] font-semibold uppercase tracking-[.16em] text-white transition-colors hover:bg-[#102238]';
+  appointment.textContent = 'Hablemos de tu caso ↗';
+  appointment.addEventListener('click', () => {
+    dialog.close();
+    document.querySelector('[data-testid="header-agenda-button"]')?.click();
+  });
+  footer.append(prompt, appointment);
+  dialog.style.width = 'calc(100% - 2rem)';
+  dialog.classList.add('published-idea-dialog');
+  dialog.addEventListener('click', (event) => { if (event.target === dialog) {
+    const rect = dialog.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+  } });
+  dialog.append(close, label, heading, cover, body, footer);
 
   for (const post of posts) {
     const card = template.cloneNode(true);
@@ -60,11 +84,14 @@ async function loadPublishedIdeas() {
       card.insertBefore(thumbnail, card.children[1]);
     }
     card.addEventListener('click', () => {
+      const content = image ? post.content.slice(image[0].length) : post.content;
+      const minutes = Math.max(1, Math.ceil(content.trim().split(/\s+/).length / 200));
+      label.textContent = `${post.tag} · ${minutes} min`;
       heading.textContent = post.title;
       cover.hidden = !image;
       if (image) cover.src = image[1];
       else cover.removeAttribute('src');
-      body.textContent = image ? post.content.slice(image[0].length) : post.content;
+      body.textContent = content;
       dialog.showModal();
     });
     grid.append(card);
