@@ -1,0 +1,29 @@
+#preguntas[data-testid="faq-section"] {
+  background: #0d223a;
+  border-color: rgba(255, 255, 255, .2);
+  color: #fff;
+}
+
+#preguntas .eyebrow,
+#preguntas h2 em,
+#preguntas [data-testid^="faq-trigger-"]:hover,
+#preguntas [data-testid^="faq-trigger-"] svg {
+  color: #e9cd87;
+}
+
+#preguntas [data-testid^="faq-item-"] {
+  border-color: rgba(255, 255, 255, .25);
+}
+
+#preguntas [data-testid^="faq-trigger-"] { color: #fff; }
+#preguntas [data-testid^="faq-item-"] p { color: #dce6f0; }
+
+#preguntas [data-testid="faq-whatsapp-link"] {
+  color: #e9cd87;
+  border-color: #e9cd87;
+}
+
+#preguntas [data-testid="faq-whatsapp-link"]:hover {
+  background: #e9cd87;
+  color: #0d223a;
+}
