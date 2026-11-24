@@ -1,0 +1,84 @@
+/* Public dialogs share a dark glass panel with a gold edge. */
+:is(.projection-request, .published-idea-dialog)::backdrop,
+:is([data-testid="idea-dialog"], [data-testid="appointment-dialog"]) {
+  background: rgba(5, 13, 25, .67);
+  backdrop-filter: blur(7px);
+}
+
+:is(
+  .projection-request,
+  .published-idea-dialog,
+  [data-testid="idea-dialog"] > article,
+  [data-testid="appointment-dialog"] > .appointment-glass
+) {
+  --modal-text: #f3f7ff;
+  --modal-muted: #d1ddea;
+  --modal-accent: #ead18f;
+  color: var(--modal-text);
+  color-scheme: dark;
+  border: 1px solid transparent;
+  border-radius: 1.35rem;
+  background:
+    radial-gradient(ellipse at top left, rgba(75, 115, 159, .36), transparent 65%) padding-box,
+    linear-gradient(145deg, rgba(18, 38, 62, .96), rgba(8, 20, 36, .94)) padding-box,
+    linear-gradient(125deg, #e9cd87a6, #94b6e447 42%, #e9cd876b) border-box;
+  box-shadow: 0 24px 75px rgba(0, 0, 0, .48), inset 0 1px 0 rgba(255, 255, 255, .09);
+  backdrop-filter: blur(20px);
+  animation: ximnanzas-modal-in 220ms ease-out both;
+}
+
+@keyframes ximnanzas-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+:is(.projection-request, .published-idea-dialog, [data-testid="idea-dialog"], [data-testid="appointment-dialog"]) :is(p, label, label span),
+.published-idea-dialog #published-idea-title ~ div {
+  color: var(--modal-muted, #d1ddea);
+}
+
+:is(.published-idea-dialog, [data-testid="idea-dialog"], [data-testid="appointment-dialog"]) .eyebrow {
+  color: var(--modal-accent, #ead18f);
+}
+
+:is(.projection-request, [data-testid="appointment-dialog"]) input {
+  color: var(--modal-text, #f3f7ff);
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(210, 228, 255, .28);
+  border-radius: .65rem;
+}
+
+:is(.projection-request, [data-testid="appointment-dialog"]) input::placeholder { color: #b6c5d7; }
+
+:is(.projection-request, .published-idea-dialog, [data-testid="idea-dialog"], [data-testid="appointment-dialog"]) :is(button, input):focus-visible {
+  outline: 2px solid #ead18f;
+  outline-offset: 3px;
+}
+
+:is(.projection-request-actions button, [data-testid="appointment-close-button"], [data-testid="idea-dialog-close"], .published-idea-dialog button[aria-label="Cerrar nota"], [data-testid^="time-slot-"]) {
+  color: #f3f7ff;
+  background: rgba(255, 255, 255, .09);
+  border: 1px solid rgba(210, 228, 255, .28);
+  border-radius: .65rem;
+}
+
+:is([data-testid="appointment-close-button"], [data-testid="idea-dialog-close"], .published-idea-dialog button[aria-label="Cerrar nota"]) {
+  border-radius: 50%;
+}
+
+:is(.projection-request-actions button[type="submit"], .projection-confirmation button, .published-idea-dialog .star-border, [data-testid="idea-dialog-agenda"], [data-testid="appointment-submit-button"], [data-testid^="time-slot-"][aria-pressed="true"]) {
+  color: #102238;
+  border-color: #ead18f;
+  background: linear-gradient(135deg, #f2dda4, #d9b768);
+  box-shadow: 0 5px 20px rgba(233, 205, 135, .18);
+}
+
+:is(.projection-request-actions button, .published-idea-dialog button, [data-testid="appointment-dialog"] button, [data-testid="idea-dialog"] button):hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.projection-request, .published-idea-dialog, [data-testid="idea-dialog"] > article, [data-testid="appointment-dialog"] > .appointment-glass) {
+    animation: none;
+  }
+}
