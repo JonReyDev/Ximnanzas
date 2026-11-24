@@ -4,7 +4,7 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
 }
 
-#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]) {
+:is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]) {
   --idea-glow: rgba(81, 139, 206, .44);
   --idea-edge: #85baff;
   min-height: 18rem;
@@ -22,31 +22,31 @@
   overflow-wrap: anywhere;
 }
 
-#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]):nth-child(3n + 2) {
+:is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]):nth-child(3n + 2) {
   --idea-glow: rgba(66, 147, 129, .38);
   --idea-edge: #a5e0cb;
 }
 
-#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]):nth-child(3n) {
+:is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]):nth-child(3n) {
   --idea-glow: rgba(201, 159, 79, .38);
   --idea-edge: #f0d18a;
 }
 
-#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]):hover {
+:is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]):hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 34px rgba(13, 34, 58, .25);
 }
 
-#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]):focus-visible {
+:is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]):focus-visible {
   outline: 2px solid #003781;
   outline-offset: 4px;
 }
 
-#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]) h3 { color: #f5f8ff; }
-#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]) p { color: #d2deeb; }
-#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]) :is(.eyebrow, svg) { color: var(--idea-edge); }
+:is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]) h3 { color: #f5f8ff; }
+:is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]) p { color: #d2deeb; }
+:is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]) :is(.eyebrow, svg) { color: var(--idea-edge); }
 
-#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]) div > span {
+:is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]) div > span {
   color: #f5f8ff;
   padding: .65rem .9rem;
   border-radius: 999px;
@@ -54,6 +54,23 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]) { transition: none; }
-  #ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]):hover { transform: none; }
+  :is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]) { transition: none; }
+  :is(#ideas :is([data-testid^="idea-card-"], [data-testid^="published-idea-"]), #servicios [data-testid^="service-card-"]):hover { transform: none; }
+}
+
+#servicios :has(> [data-testid^="service-card-"]) {
+  gap: clamp(.9rem, 2vw, 1.5rem);
+  border: 0;
+}
+
+#servicios [data-testid^="service-card-"] > div:first-child > span {
+  padding: 0;
+  background: none;
+  color: var(--idea-edge);
+  opacity: .8;
+}
+
+#servicios [data-testid^="service-card-"]:nth-child(4n) {
+  --idea-glow: rgba(119, 106, 193, .42);
+  --idea-edge: #c5b9ff;
 }
