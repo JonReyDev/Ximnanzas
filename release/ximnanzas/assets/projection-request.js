@@ -9,13 +9,14 @@ dialog.innerHTML = `
     <p data-scenario></p>
     <label>Nombre completo <input name="name" autocomplete="name" required minlength="2" maxlength="100"></label>
     <label>Correo electrónico <input name="email" type="email" autocomplete="email" required maxlength="254"></label>
+    <label>Teléfono de WhatsApp (opcional) <input name="phone" type="tel" autocomplete="tel" maxlength="25" placeholder="Ej. +52 55 1234 5678"></label>
     <div class="projection-request-numbers">
       <label>Aportación mensual (mín. $2,000) <input name="monthly" type="number" min="2000" max="50000" step="1" required></label>
       <label>Plazo comprometido <input name="years" type="number" min="10" max="25" step="1" required></label>
       <label>Ingreso anual acumulable (opcional) <input name="income" type="number" min="0" max="100000000" step="1"></label>
       <label>Tasa marginal de ISR % (opcional) <input name="isr" type="number" min="0" max="35" step=".01"></label>
     </div>
-    <p>Usaremos tu nombre y correo para enviarte el PDF y dar seguimiento a tu solicitud.</p>
+    <p>Usaremos tu correo para enviarte el PDF. Si dejas tu número, podremos dar seguimiento por WhatsApp.</p>
     <p>Completa ingreso e ISR para estimar la deducción. La proyección es ilustrativa.</p>
     <p data-feedback role="status" aria-live="polite"></p>
     <div class="projection-request-actions">
@@ -83,6 +84,7 @@ form.addEventListener('submit', async (event) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...scenario, name: String(data.get('name')).trim(), email: String(data.get('email')).trim(),
+        phone: String(data.get('phone') ?? '').trim(),
         monthly: Number(data.get('monthly')), years: Number(data.get('years')),
         income: income && isr ? income : 0, isr: income && isr ? isr : 0,
       }),

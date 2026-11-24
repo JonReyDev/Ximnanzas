@@ -6,6 +6,8 @@ import { terms, type Quote } from '../src/lib/optimaxx.js';
 function validate(body: Quote) {
   return typeof body.name === 'string' && body.name.trim().length >= 2 && body.name.length <= 100 &&
     typeof body.email === 'string' && body.email.length <= 254 && /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(body.email) &&
+    (body.phone === undefined || (typeof body.phone === 'string' && body.phone.length <= 25 &&
+      (body.phone === '' || /^\+?\d{10,15}$/.test(body.phone.replace(/[\s().-]/g, ''))))) &&
     Number.isInteger(body.age) && body.age >= 18 && body.age <= 65 &&
     Number.isInteger(body.monthly) && body.monthly >= terms.minimumMonthly && body.monthly <= 50000 &&
     Number.isInteger(body.years) && body.years >= 10 && body.years <= 25 &&
@@ -50,8 +52,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY;
   if (!supabaseUrl || !supabaseKey) return reply(503, { error: 'El registro de solicitudes no está disponible en este momento.' });
 
+  const phone = quote.phone?.replace(/[\s().-]/g, '') ?? '';
   const idempotency = createHash('sha256')
-    .update(JSON.stringify([quote.email.toLowerCase(), quote.name, quote.age, quote.monthly, quote.years, quote.rate, quote.income, quote.isr, Math.floor(Date.now() / 600000)]))
+    .update(JSON.stringify([quote.email.toLowerCase(), quote.name, phone, quote.age, quote.monthly, quote.years, quote.rate, quote.income, quote.isr, Math.floor(Date.now() / 600000)]))
     .digest('hex');
   const leadId = `${idempotency.slice(0, 8)}-${idempotency.slice(8, 12)}-4${idempotency.slice(13, 16)}-8${idempotency.slice(17, 20)}-${idempotency.slice(20, 32)}`;
 
@@ -64,7 +67,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         id: leadId,
         name: quote.name.trim(),
         email: quote.email.trim(),
-        phone: '',
+        phone,
         service: 'Proyección de retiro',
         message: 'Solicitó su proyección OptiMaxx plus por correo.',
       }),

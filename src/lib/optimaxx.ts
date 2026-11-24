@@ -8,6 +8,7 @@ export const terms = {
 export type Quote = {
   name: string;
   email: string;
+  phone?: string;
   age: number;
   monthly: number;
   years: number;
