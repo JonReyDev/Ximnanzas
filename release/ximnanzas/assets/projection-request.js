@@ -25,6 +25,19 @@ dialog.innerHTML = `
   </form>
 `;
 document.body.append(dialog);
+const confirmation = document.createElement('dialog');
+confirmation.className = 'projection-request';
+confirmation.setAttribute('aria-labelledby', 'projection-confirmation-title');
+confirmation.setAttribute('aria-describedby', 'projection-confirmation-message');
+confirmation.innerHTML = `
+  <form method="dialog">
+    <h2 id="projection-confirmation-title">¡Ya tenemos tu solicitud!</h2>
+    <p id="projection-confirmation-message">Tu proyección va en camino. Revisa tu correo en unos minutos.</p>
+    <div class="projection-request-actions"><button autofocus>Cerrar</button></div>
+  </form>
+`;
+document.body.append(confirmation);
+
 const form = dialog.querySelector('form');
 const feedback = form.querySelector('[data-feedback]');
 const submit = form.querySelector('[type="submit"]');
@@ -77,7 +90,8 @@ form.addEventListener('submit', async (event) => {
     const result = await response.json().catch(() => ({}));
     if (!response.ok || !result.ok) throw new Error(result.error || 'No se pudo enviar la solicitud.');
     sent = true;
-    feedback.textContent = '¡Ya tenemos tu solicitud! Tu proyección va en camino. Revisa tu correo en unos minutos.';
+    dialog.close();
+    confirmation.showModal();
   } catch (error) {
     feedback.textContent = error.message || 'No se pudo enviar. Intenta de nuevo.';
   } finally {
