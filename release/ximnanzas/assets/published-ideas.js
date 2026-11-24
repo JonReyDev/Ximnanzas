@@ -66,4 +66,14 @@ function start() {
   if (root && !renderWhenReady()) observer.observe(root, { childList: true, subtree: true });
 }
 
+// The panel is a separate Vercel entry point and needs a full navigation.
+document.addEventListener('click', (event) => {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const link = event.target instanceof Element && event.target.closest('a[data-testid="footer-admin-link"]');
+  if (!link) return;
+  event.preventDefault();
+  event.stopPropagation();
+  window.location.assign(link.href);
+}, { capture: true });
+
 start();
