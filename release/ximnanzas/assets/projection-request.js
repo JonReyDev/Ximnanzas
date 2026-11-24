@@ -14,6 +14,7 @@ dialog.innerHTML = `
       <label>Ingreso anual acumulable (opcional) <input name="income" type="number" min="0" max="100000000" step="1"></label>
       <label>Tasa marginal de ISR % (opcional) <input name="isr" type="number" min="0" max="35" step=".01"></label>
     </div>
+    <p>Usaremos tu nombre y correo para enviarte el PDF y dar seguimiento a tu solicitud.</p>
     <p>Completa ingreso e ISR para estimar la deducción. La proyección es ilustrativa.</p>
     <p data-feedback role="status" aria-live="polite"></p>
     <div class="projection-request-actions">

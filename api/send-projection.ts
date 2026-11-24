@@ -46,11 +46,39 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const from = process.env.RESEND_FROM_EMAIL;
   if (!key || !from) return reply(503, { error: 'El envío por correo no está disponible en este momento.' });
 
+  const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!supabaseUrl || !supabaseKey) return reply(503, { error: 'El registro de solicitudes no está disponible en este momento.' });
+
+  const idempotency = createHash('sha256')
+    .update(JSON.stringify([quote.email.toLowerCase(), quote.name, quote.age, quote.monthly, quote.years, quote.rate, quote.income, quote.isr, Math.floor(Date.now() / 600000)]))
+    .digest('hex');
+  const leadId = `${idempotency.slice(0, 8)}-${idempotency.slice(8, 12)}-4${idempotency.slice(13, 16)}-8${idempotency.slice(17, 20)}-${idempotency.slice(20, 32)}`;
+
+  try {
+    const saved = await fetch(new URL('/rest/v1/leads', supabaseUrl), {
+      method: 'POST',
+      signal: AbortSignal.timeout(8000),
+      headers: { apikey: supabaseKey, 'Content-Type': 'application/json', Prefer: 'resolution=ignore-duplicates,return=minimal' },
+      body: JSON.stringify({
+        id: leadId,
+        name: quote.name.trim(),
+        email: quote.email.trim(),
+        phone: '',
+        service: 'Proyección de retiro',
+        message: 'Solicitó su proyección OptiMaxx plus por correo.',
+      }),
+    });
+    if (!saved.ok) {
+      console.error('Supabase no registró el prospecto de proyección', saved.status);
+      return reply(502, { error: 'No se pudo registrar tu solicitud. Intenta de nuevo en unos minutos.' });
+    }
+  } catch {
+    return reply(502, { error: 'No se pudo registrar tu solicitud. Intenta de nuevo en unos minutos.' });
+  }
+
   try {
     const pdf = Buffer.from(createOptimaxxPdf(quote)).toString('base64');
-    const idempotency = createHash('sha256')
-      .update(JSON.stringify([quote.email.toLowerCase(), quote.name, quote.age, quote.monthly, quote.years, quote.rate, quote.income, quote.isr, Math.floor(Date.now() / 600000)]))
-      .digest('hex');
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       signal: AbortSignal.timeout(12000),
