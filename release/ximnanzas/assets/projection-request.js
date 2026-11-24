@@ -10,6 +10,7 @@ dialog.innerHTML = `
     <label>Nombre completo <input name="name" autocomplete="name" required minlength="2" maxlength="100"></label>
     <label>Correo electrónico <input name="email" type="email" autocomplete="email" required maxlength="254"></label>
     <div class="projection-request-numbers">
+      <label>Aportación mensual (mín. $2,000) <input name="monthly" type="number" min="2000" max="50000" step="1" required></label>
       <label>Plazo comprometido <input name="years" type="number" min="10" max="25" step="1" required></label>
       <label>Ingreso anual acumulable (opcional) <input name="income" type="number" min="0" max="100000000" step="1"></label>
       <label>Tasa marginal de ISR % (opcional) <input name="isr" type="number" min="0" max="35" step=".01"></label>
@@ -43,11 +44,12 @@ document.addEventListener('click', (event) => {
   const profile = document.querySelector('#simulador [data-testid^="risk-chip-"][aria-pressed="true"]');
   const rate = rates[profile?.dataset.testid?.replace('risk-chip-', '')];
   form.reset();
-  scenario = { age, monthly, rate };
+  scenario = { age, rate };
+  form.elements.namedItem('monthly').value = Math.max(2000, monthly);
   form.elements.namedItem('years').value = Math.min(25, Math.max(10, 65 - age));
-  form.querySelector('[data-scenario]').textContent = `${age} años · ${monthly.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 })} al mes · ${rate * 100}% de rendimiento anual supuesto.`;
-  feedback.textContent = monthly < 2000 ? 'Ajusta la aportación del simulador a $2,000 mensuales o más para solicitar esta proyección.' : '';
-  submit.disabled = monthly < 2000 || !rate;
+  form.querySelector('[data-scenario]').textContent = `${age} años · ${rate * 100}% de rendimiento anual supuesto.`;
+  feedback.textContent = monthly < 2000 ? 'La aportación del simulador era menor al mínimo. Puedes editar el monto de la proyección aquí, desde $2,000 al mes.' : '';
+  submit.disabled = !rate;
   if (!dialog.open) dialog.showModal();
 }, { capture: true });
 
@@ -57,10 +59,6 @@ form.addEventListener('submit', async (event) => {
   const data = new FormData(form);
   const income = Number(data.get('income'));
   const isr = Number(data.get('isr')) / 100;
-  if (Boolean(income) !== Boolean(isr)) {
-    feedback.textContent = 'Indica ambos datos fiscales o deja los dos campos vacíos.';
-    return;
-  }
   sending = true;
   close.disabled = true;
   submit.disabled = true;
@@ -72,7 +70,8 @@ form.addEventListener('submit', async (event) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...scenario, name: String(data.get('name')).trim(), email: String(data.get('email')).trim(),
-        years: Number(data.get('years')), income, isr,
+        monthly: Number(data.get('monthly')), years: Number(data.get('years')),
+        income: income && isr ? income : 0, isr: income && isr ? isr : 0,
       }),
     });
     const result = await response.json().catch(() => ({}));
