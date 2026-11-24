@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download, LogOut, RefreshCw } from 'lucide-react';
+import { Download, LogOut, RefreshCw, Trash2 } from 'lucide-react';
 import { isSupabaseConfigured, supabase, type BlogPost } from '@/lib/supabase';
 
 const LEAD_STATUSES = ['Nuevo', 'Contactado', 'En seguimiento', 'Cerrado'] as const;
@@ -51,6 +51,8 @@ export function ProspectosPage() {
   const [leads, setLeads] = useState<Prospect[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [deletingPostId, setDeletingPostId] = useState<string>();
+  const [postFeedback, setPostFeedback] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'leads' | 'appointments' | 'ideas'>('leads');
@@ -139,6 +141,31 @@ export function ProspectosPage() {
     setPostForm({ tag: 'Ideas', title: '', excerpt: '', content: '', published: true });
   };
 
+  const deletePost = async (post: BlogPost) => {
+    const { id, title } = post;
+    if (!id || deletingPostId) return;
+    if (!window.confirm(`¿Eliminar permanentemente «${title}»?`)) return;
+
+    setDeletingPostId(id);
+    setPostFeedback('');
+    try {
+      const { data, error: deleteError } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('id', id)
+        .select('id')
+        .maybeSingle();
+
+      if (deleteError || !data) throw deleteError ?? new Error('No se eliminó la nota.');
+      setPosts((current) => current.filter((item) => item.id !== id));
+      setPostFeedback('Nota eliminada.');
+    } catch {
+      setPostFeedback('No se pudo eliminar la nota. Actualiza la lista y vuelve a intentar.');
+    } finally {
+      setDeletingPostId(undefined);
+    }
+  };
+
   if (!isSupabaseConfigured) {
     return <div className="prospectos-page"><h1>Panel de prospectos</h1><p>Configura Supabase para acceder al panel.</p></div>;
   }
@@ -187,7 +214,40 @@ export function ProspectosPage() {
             <label className="prospectos-publish-toggle"><input type="checkbox" checked={postForm.published} onChange={(event) => setPostForm({ ...postForm, published: event.target.checked })} /> Publicar en Ideas al guardar</label>
             <button className="button button-primary" type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Guardar nota'}</button>
           </form>
-          <section className="prospectos-table-section"><div className="prospectos-section-heading"><div><span className="section-kicker">Contenido</span><h2>Notas guardadas</h2></div></div>{posts.length === 0 ? <p className="prospectos-empty">Todavía no hay notas creadas.</p> : <div className="prospectos-post-list">{posts.map((post) => <article key={post.id} className="prospectos-post-item"><div><span className="section-kicker">{post.tag} · {post.published ? 'Publicada' : 'Borrador'}</span><h3>{post.title}</h3><p>{post.excerpt}</p></div><small>{post.created_at ? new Date(post.created_at).toLocaleDateString('es-MX') : '-'}</small></article>)}</div>}</section>
+          <section className="prospectos-table-section">
+            <div className="prospectos-section-heading">
+              <div><span className="section-kicker">Contenido</span><h2>Notas guardadas</h2></div>
+            </div>
+            <p role="status">{postFeedback}</p>
+            {posts.length === 0 ? (
+              <p className="prospectos-empty">Todavía no hay notas creadas.</p>
+            ) : (
+              <div className="prospectos-post-list">
+                {posts.map((post) => (
+                  <article key={post.id} className="prospectos-post-item">
+                    <div>
+                      <span className="section-kicker">{post.tag} · {post.published ? 'Publicada' : 'Borrador'}</span>
+                      <h3>{post.title}</h3>
+                      <p>{post.excerpt}</p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <small>{post.created_at ? new Date(post.created_at).toLocaleDateString('es-MX') : '-'}</small>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-red-700 underline disabled:opacity-50"
+                        aria-label={`Eliminar nota: ${post.title}`}
+                        disabled={!post.id || Boolean(deletingPostId)}
+                        onClick={() => void deletePost(post)}
+                      >
+                        <Trash2 size={15} aria-hidden="true" />
+                        {post.id && deletingPostId === post.id ? 'Eliminando…' : 'Eliminar'}
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
         </section>
       )}
     </div>
