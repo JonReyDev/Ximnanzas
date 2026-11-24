@@ -1,0 +1,21 @@
+.projection-request {
+  width: min(92vw, 38rem);
+  max-height: 90dvh;
+  margin: auto;
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+  overflow: auto;
+  color: #102238;
+  background: #f7f5f0;
+  border: 1px solid #d8b86a;
+  border-radius: 1.25rem;
+}
+.projection-request::backdrop { background: #102238bb; backdrop-filter: blur(4px); }
+.projection-request form, .projection-request label { display: grid; gap: .5rem; }
+.projection-request h2 { font: 1.75rem Georgia, serif; }
+.projection-request p, .projection-request label { font-size: .875rem; }
+.projection-request input { width: 100%; padding: .5rem; border: 1px solid #8c98a4; border-radius: .4rem; background: white; }
+.projection-request-numbers { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+.projection-request-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+.projection-request-actions button { padding: .6rem 1rem; border: 1px solid #102238; border-radius: .45rem; }
+.projection-request-actions button[type=submit] { background: #102238; color: white; }
+.projection-request-actions button:disabled { opacity: .55; }
