@@ -19,3 +19,12 @@
 .projection-request-actions button { padding: .6rem 1rem; border: 1px solid #102238; border-radius: .45rem; }
 .projection-request-actions button[type=submit] { background: #102238; color: white; }
 .projection-request-actions button:disabled { opacity: .55; }
+
+.projection-confirmation {
+  width: min(92vw, 29rem);
+  background: rgba(247, 245, 240, .88);
+  border-color: rgba(216, 184, 106, .8);
+  box-shadow: 0 18px 60px rgba(16, 34, 56, .24);
+  backdrop-filter: blur(14px) saturate(120%);
+}
+.projection-confirmation::backdrop { background: rgba(16, 34, 56, .48); }

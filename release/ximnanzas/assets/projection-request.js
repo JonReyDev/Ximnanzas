@@ -26,7 +26,7 @@ dialog.innerHTML = `
 `;
 document.body.append(dialog);
 const confirmation = document.createElement('dialog');
-confirmation.className = 'projection-request';
+confirmation.className = 'projection-request projection-confirmation';
 confirmation.setAttribute('aria-labelledby', 'projection-confirmation-title');
 confirmation.setAttribute('aria-describedby', 'projection-confirmation-message');
 confirmation.innerHTML = `
