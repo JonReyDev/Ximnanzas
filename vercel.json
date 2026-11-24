@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/send-projection.ts": {
+      "includeFiles": "public/{ALLIANZ.png,assets/ximnanzas-logo.png}"
+    }
+  },
   "installCommand": "npm ci",
   "redirects": [
     {

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { jsPDF } from 'jspdf';
 import { projectOptimaxx, terms, type Quote } from './optimaxx.js';
 import { formatCurrency } from './simulador.js';
@@ -15,10 +16,15 @@ const costs = [
 ];
 
 export function createOptimaxxPdf(quote: Quote): ArrayBuffer {
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
   const margin = 12;
   const width = 273;
-  let y = 26;
+  const ximnanzasLogo = readFileSync('public/assets/ximnanzas-logo.png');
+  const allianzLogo = readFileSync('public/ALLIANZ.png');
+  doc.addImage(ximnanzasLogo, 'PNG', margin, 8, 16, 16 * 345 / 273);
+  doc.addImage(allianzLogo, 'PNG', margin + width - 39, 12, 39, 39 * 135 / 396);
+  doc.setDrawColor('#d8b86a').line(margin, 32, margin + width, 32);
+  let y = 41;
   const now = new Date();
   const validUntil = new Date(now.getTime() + 15 * 86400000);
   const date = (value: Date) => value.toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' });
@@ -52,7 +58,7 @@ export function createOptimaxxPdf(quote: Quote): ArrayBuffer {
     });
     y += height;
   };
-  title('XIMNANZAS  |  Proyección ilustrativa OptiMaxx plus');
+  title('Proyección ilustrativa OptiMaxx plus');
   paragraph(`Preparada para ${quote.name}. Generada el ${date(now)}. Vigencia de 15 días, hasta el ${date(validUntil)}.`);
   paragraph(`Art. 151 LISR · Edad inicial ${quote.age} · Plazo ${quote.years} años · Aportación inicial ${formatCurrency(quote.monthly)} al mes · Rendimiento anual supuesto ${quote.rate * 100}% · Inflación ${terms.inflation * 100}% · UDI inicial ilustrativa $${terms.udi}.`);
   title('Tabla de aportaciones por año (MXN)');
