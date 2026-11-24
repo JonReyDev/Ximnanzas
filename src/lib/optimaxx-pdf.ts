@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf';
-import { projectOptimaxx, terms, type Quote } from './optimaxx';
-import { formatCurrency } from './simulador';
+import { projectOptimaxx, terms, type Quote } from './optimaxx.js';
+import { formatCurrency } from './simulador.js';
 
 const widths = [12, 12, 35, 40, 32, 34, 57, 51];
 const headers = ['Año', 'Edad', 'Aportación anual', 'Aportación acumulada', 'Saldo del fondo', 'Saldo disponible', 'Saldo disponible neto de retención de impuestos de Allianz', 'Beneficio de deducibilidad acumulado reinvertido'];

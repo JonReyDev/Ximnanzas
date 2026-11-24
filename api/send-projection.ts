@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { createOptimaxxPdf } from '../src/lib/optimaxx-pdf';
-import { terms, type Quote } from '../src/lib/optimaxx';
+import { createOptimaxxPdf } from '../src/lib/optimaxx-pdf.js';
+import { terms, type Quote } from '../src/lib/optimaxx.js';
 
 function validate(body: Quote) {
   return typeof body.name === 'string' && body.name.trim().length >= 2 && body.name.length <= 100 &&
